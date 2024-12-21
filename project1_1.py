@@ -3,20 +3,38 @@ import numpy as np
 from mtcnn import MTCNN
 import face_recognition
 from moviepy import VideoFileClip, concatenate_videoclips
+import keyboard
 
 
 mtcnn = MTCNN(device='cpu')
 
+def rotate_image(image, angle):
+    # Lấy kích thước ảnh
+    (h, w) = image.shape[:2]
+    # Tính tâm của ảnh
+    center = (w // 2, h // 2)
+    
+    # Tạo ma trận xoay
+    M = cv.getRotationMatrix2D(center, angle, scale=1.0)
+    # Xoay ảnh
+    rotated = cv.warpAffine(image, M, (w, h))
+    return rotated
+
+
 def preprocess(images):   
+    
     argImages = []
     for image in images:
+        
         resized_image = cv.resize(image, (image.shape[1]*2, image.shape[0]*2))
+        
         argImages.extend([
-            resized_image,  
+            resized_image,
             cv.flip(resized_image, 1),
             cv.rotate(resized_image, cv.ROTATE_90_CLOCKWISE),
             cv.rotate(resized_image, cv.ROTATE_90_COUNTERCLOCKWISE),
         ])
+        argImages.extend([rotate_image(resized_image,angle) for angle in[-30,30]])
     return argImages
 
 def face_encodings(image, model):
@@ -71,9 +89,19 @@ limitClipLen = int(2 * fps)
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
+        print("The video will be export in second")
         break
+    
+    
     cv.imshow("Processing Frame", frame)
     cv.waitKey(1)
+    #preprocessing  balance the light and reduce noise
+    # yuv = cv.cvtColor(frame, cv.COLOR_BGR2YUV)
+    # yuv[:, :, 0] = cv.equalizeHist(yuv[:, :, 0])  # Cân bằng histogram kênh sáng (Y)
+    # frame = cv.cvtColor(yuv, cv.COLOR_YUV2BGR)
+
+    # #USing Gaussian to reduce noise
+    # frame = cv.GaussianBlur(frame, (5, 5), 0)
     faces = mtcnn.detect_faces(frame)
     face_detected = False
     
@@ -82,6 +110,7 @@ while cap.isOpened():
         x2, y2 = x1 + width, y1 + height
         face_crop = frame[y1:y2, x1:x2]
         face_crop_encodings = face_encodings(face_crop, mtcnn)
+        cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
         if any(
             face_recognition.compare_faces(faceInInput, enc, tolerance=tolerance)
@@ -101,7 +130,20 @@ while cap.isOpened():
             end_time = frame_number / fps + 2
             clip = VideoFileClip(video_path).subclipped(currStart, end_time)
             clips.append(clip)
+            
+            cap.set(cv.CAP_PROP_POS_MSEC, currStart * 1000)  # Đặt video tới thời điểm currStart
+            ret, first_frame = cap.read()
+            cv.imshow("first",first_frame)
+            cv.waitKey(1)
+            if ret:
+                imageInput.append(first_frame)
+                new_encodings = face_encodings(first_frame, mtcnn)
+                faceInInput.extend(new_encodings)  # Thêm các mã hóa khuôn mặt mới
+                print(f"Added first frame of clip starting at {currStart} seconds to reference images.")
             currStart = None
+    if keyboard.is_pressed('w'):
+        print("Stop processing the vid, the video will be export in second")
+        break
 #in here create an arg to record the latest face momment, decreasing by frame,
 # if>0 update new momment and add into latest clip, else make new clip
 
@@ -117,14 +159,8 @@ if clips:
 else:
     print("Oops !I did it again,my bad")
 
-#18/12 vấn đề : đang bị trùng lặp quá nhiều frame, cần 1 giải pháp là nếu đã nhận diện được rồi thì ghi thời điểm bắt đầu vào ,
-# ghi thời điểm kết thúc từ thời điểm bắt đầu đầu tiên và cộng dồn lại
-#với nguồn vào input cần có nhiều góc độ mặt khác nhau   -->solve
 
 
-
-#19/12 sau khi  thay đổi : thời gian render giảm đáng kể từ 35p->20p
-#nguyên nhân : do để nhầm vị trí của destroyallwindow-> cửa sổ quan sát bị tắt liên tục -> tăng số tiến trình IO
-
-# input nhập vào chỉ chạy được khi ở dạng jpg
-#20/12 : thêm vào các breakPoint để chương trình kiểm tra từng công đoạn
+#21/12: thêm trình xử lí xoay hình ảnh để tăng độ nhận diện , tiền xử lí hình ảnh tuy nhiên đã có hiện tượng overfit do  blur không tốt
+#đã sửa và thêm tính năng cho frame đầu tiên của mỗi clip vào trong inputImage, các cảnh trong output thay đổi khá rõ
+#cần xem lại quá trình thay đổi trọng số
