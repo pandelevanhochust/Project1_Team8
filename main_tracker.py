@@ -142,14 +142,18 @@ def action_segmentation (close_objects):
         appear_time = appear / 2 / fps
         disappear_time = disappear / 2 / fps
 
-        output_filename = os.path.join(output_video,f"{obj1} and {obj2}-{pair}_from_{appear}_to_{disappear}.mp4")
+        parent_dir = os.path.join(output_video, video_name)
+        os.makedirs(parent_dir, exist_ok=True)
+
+        output_filename = os.path.join(parent_dir,f"{obj1} and {obj2}-{pair}_from_{appear}_to_{disappear}.mp4")
+
         #extract clip
         subclip = clip.subclipped(appear_time, disappear_time)
         subclip.write_videofile(output_filename,codec="libx264")
         print (f"Clip {obj1} and {obj2}-{pair}_from_{appear}_to_{disappear} saved")
 
 # Initialize video capture
-input = ""
+input = "billie on the couch.mp4"
 cap = cv2.VideoCapture(input)
 clip = VideoFileClip(input)
 video_name = os.path.splitext(os.path.basename(input))[0]
