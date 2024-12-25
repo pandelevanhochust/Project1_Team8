@@ -77,7 +77,7 @@ def get_action_descriptions(detections, actions):
 # def extract_objects(track_id,class_id,frame):
 
 # Initialize video capture
-cap = cv2.VideoCapture('billie on the couch.mp4')  # Replace with your input video path
+cap = cv2.VideoCapture('inception.mp4')  # Replace with your input video path
 
 # Initialize variables
 tracks = []
@@ -161,7 +161,7 @@ while cap.isOpened():
             B, G, R = map(int,color)
 
             # Annotate frame
-            # cv2.rectangle(frame, (x1, y1), (x2, y2), (B, G, R), 2)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (B, G, R), 2)
             cv2.putText(frame, label, (x1 + 5, y1 - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
     # Generate descriptions for actions
