@@ -18,11 +18,12 @@ output_video = "segmented clips"
 os.makedirs(output_video, exist_ok=True)
 
 # Initialize DeepSort tracker
-tracker = DeepSort(max_age=0)
+tracker = DeepSort(max_age=2)
 
 # Load COCO class names
-with open("data_ext/classes.names") as f:
-    classes_name = f.read().strip().split("\n")
+# with open("data_ext/classes.names") as f:
+#     classes_name = f.read().strip().split("\n")
+
 #exceptional_classes
 exceptional_classes = [56,57]
 
@@ -43,7 +44,7 @@ actions = {
 }
 
 # Assign unique colors for tracks
-colors = np.random.randint(0,255, size=(len(classes_name),3 ))
+colors = np.random.randint(0,255, size=(80,3 ))
 
 #check whether two objects are close
 #intersection area method
@@ -125,7 +126,7 @@ def object_segmentation(track_objects):
                                    f"{obj['name']}-{track_id}_from_{obj['appear']}_to_{obj['disappear']}.jpg"
                                    )
         # Create a subdirectory for the object class
-        class_dir = os.path.join(parent_dir, classes_name[class_id])
+        class_dir = os.path.join(parent_dir, model.names[class_id])
         os.makedirs(class_dir, exist_ok=True)
 
         segmented_object.save(output_path)
@@ -150,7 +151,7 @@ def action_segmentation (close_objects):
         print (f"Clip {obj1} and {obj2}-{pair}_from_{appear}_to_{disappear} saved")
 
 # Initialize video capture
-input = "dung.mp4"
+input = "hotel.mp4"
 cap = cv2.VideoCapture(input)
 clip = VideoFileClip(input)
 video_name = os.path.splitext(os.path.basename(input))[0]
@@ -195,7 +196,7 @@ while cap.isOpened():
     # Debugging: Print detected_objects
     print("Detected objects passed to tracker:")
     for obj in detected_objects:
-        print(classes_name[obj[2]],obj)
+        print(model.names[obj[2]],obj)
 
     # Update tracker with detected objects
     tracks = tracker.update_tracks(detected_objects,frame=frame_resized)
@@ -224,7 +225,7 @@ while cap.isOpened():
                 "track_id": track_id
             })
 
-            label = f"{classes_name[class_id]} {track_id}"
+            label = f"{model.names[class_id]} {track_id}"
 
             color = colors[class_id]
             B, G, R = map(int,color)
@@ -270,6 +271,8 @@ cv2.destroyAllWindows()
 #25/12: đã track được hai vật thể tương tác với nhau
 #25/12: đã tối giản mọi thú về functions
 #25/12: extract duoc video ra cho tung action
+
+#26/12: sap xep lai function
 
 
 
