@@ -46,6 +46,7 @@ actions = {
 colors = np.random.randint(0,255, size=(len(classes_name),3 ))
 
 #check whether two objects are close
+#intersection area method
 def are_close1(obj1, obj2, iou_threshold=0.1):
     # Extract bounding box coordinates
     x1, y1, x2, y2 = obj1["bbox"]
@@ -66,7 +67,7 @@ def are_close1(obj1, obj2, iou_threshold=0.1):
     # Calculate IoU and check if it meets the threshold
     iou = intersection_area / union_area
     return iou >= iou_threshold
-
+#distance between bounding box method
 def are_close2(obj1, obj2, distance_threshold=10):
     x1, y1, x2, y2 = obj1["bbox"]
     x1_, y1_, x2_, y2_ = obj2["bbox"]
@@ -74,35 +75,6 @@ def are_close2(obj1, obj2, distance_threshold=10):
     center2 = ((x1_ + x2_) / 2, (y1_ + y2_) / 2)
     distance = math.sqrt((center1[0] - center2[0]) ** 2 + (center1[1] - center2[1]) ** 2)
     return distance <= distance_threshold
-
-def object_segmentation(track_id,class_id,ltrb,frame_number):
-    x1, y1, x2, y2 = map(int, ltrb)
-    if track_id not in track_objects:
-        track_objects[track_id] = {
-            "name": model.names[class_id],
-            "bbox": ltrb,
-            "appear": frame_number,
-            "disappear": None
-        }
-
-    pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    segmented_object = pil_image.crop((x1, y1, x2, y2))
-
-    parent_dir = os.path.join(output_image, video_name)
-    os.makedirs(parent_dir, exist_ok=True)
-
-    class_dir = os.path.join(parent_dir, classes_name[class_id])
-    os.makedirs(class_dir, exist_ok=True)
-
-    output_path = os.path.join( class_dir, f"{classes_name[class_id]}-{track_id}_from_{track_objects[track_id]['appear']}_to_{track_objects[track_id]['disappear']}.jpg"
-    )
-    # Create a subdirectory for the object class
-    class_dir = os.path.join(parent_dir, classes_name[class_id])
-    os.makedirs(class_dir, exist_ok=True)
-
-    segmented_object.save(output_path)
-
-    track_objects[track_id]["disappear"] = frame_number
 
 #Function to track actions
 def action_tracker(det,obj,frame_number):
@@ -133,14 +105,39 @@ def action_description(detections, actions,frame_number):
         cv2.putText(frame, desc, (10, 30 + i * 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
         print(desc)
 
+def object_segmentation(track_objects):
+    for track_id, obj in track_objects.items():
+        x1, y1, x2, y2 = map(int, obj["bbox"])
+
+        cap.set(cv2.CAP_PROP_POS_FRAMES, obj["appear"])
+        ret, frame = cap.read()
+
+        pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        segmented_object = pil_image.crop((x1, y1, x2, y2))
+
+        parent_dir = os.path.join(output_image, video_name)
+        os.makedirs(parent_dir, exist_ok=True)
+
+        class_dir = os.path.join(parent_dir, obj["name"])
+        os.makedirs(class_dir, exist_ok=True)
+
+        output_path = os.path.join(class_dir,
+                                   f"{obj['name']}-{track_id}_from_{obj['appear']}_to_{obj['disappear']}.jpg"
+                                   )
+        # Create a subdirectory for the object class
+        class_dir = os.path.join(parent_dir, classes_name[class_id])
+        os.makedirs(class_dir, exist_ok=True)
+
+        segmented_object.save(output_path)
+
 def action_segmentation (close_objects):
     for pair,obj in close_objects.items():
         obj1 = obj['object1']
         obj2 = obj['object2']
         appear = obj['appear']
         disappear = obj['disappear']
-        appear_time = appear / 2 / fps
-        disappear_time = disappear / 2 / fps
+        appear_time = appear / fps
+        disappear_time = disappear / fps
 
         parent_dir = os.path.join(output_video, video_name)
         os.makedirs(parent_dir, exist_ok=True)
@@ -153,7 +150,7 @@ def action_segmentation (close_objects):
         print (f"Clip {obj1} and {obj2}-{pair}_from_{appear}_to_{disappear} saved")
 
 # Initialize video capture
-input = "billie on the couch.mp4"
+input = "dung.mp4"
 cap = cv2.VideoCapture(input)
 clip = VideoFileClip(input)
 video_name = os.path.splitext(os.path.basename(input))[0]
@@ -164,7 +161,7 @@ track_objects = {}
 close_objects = {}
 
 # Get video properties
-fps = int(cap.get(cv2.CAP_PROP_FPS)/2)
+fps = int(cap.get(cv2.CAP_PROP_FPS))
 frame_number =0
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -211,9 +208,15 @@ while cap.isOpened():
             ltrb = track.to_ltrb()
             class_id = track.get_det_class()
             x1, y1, x2, y2 = map(int, ltrb)
-
+            #tracking objects
             if track_id not in track_objects:
-                object_segmentation(track_id,class_id,ltrb,frame_number)
+                track_objects[track_id] = {
+                    "name": model.names[class_id],
+                    "bbox": ltrb,
+                    "appear": frame_number,
+                    "disappear": None
+                }
+            track_objects[track_id]["disappear"] = frame_number
 
             current_objects.append({
                 "name": model.names[class_id],
@@ -230,7 +233,7 @@ while cap.isOpened():
             cv2.rectangle(frame, (x1, y1), (x2, y2), (B, G, R), 2)
             cv2.putText(frame, label, (x1 + 5, y1 - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-        # Generate descriptions for actions
+        # Generate descriptions for actions and track
         action_description(current_objects, actions,frame_number)
 
     # Show the frame
@@ -252,6 +255,7 @@ for pair,obj in close_objects.items():
     print(f"Objects {obj['object1']} {pair[0]} and {obj['object2']} {pair[1]} "
           f"from frame {obj['appear']} to frame {obj['disappear']}.")
 
+object_segmentation(track_objects)
 action_segmentation(close_objects)
 
 # Release resources
