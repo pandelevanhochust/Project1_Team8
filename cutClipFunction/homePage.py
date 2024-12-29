@@ -48,7 +48,7 @@ class FaceRecognitionUI(QWidget):
         # Image Grid Area
         self.image_preview = QWidget(self)
         self.image_preview.setGeometry(0, 245, 350, 200)  # Kích thước vừa phải cho lưới 2x4
-        self.image_preview.setStyleSheet("background-color: #eeeeee; border: 1px solid #ccc;")
+        self.image_preview.setStyleSheet("background-color: #eeeeee; border: 1px solid #ccc;border-radius: 10px")
         self.grid_layout = QGridLayout(self.image_preview)  # Lưới hiển thị ảnh
         self.grid_layout.setContentsMargins(5, 5, 5, 5)
         self.grid_layout.setSpacing(10)
@@ -68,7 +68,7 @@ class FaceRecognitionUI(QWidget):
         self.video_preview.setAlignment(Qt.AlignCenter)
         
         self.add_images_button = QPushButton("CHANGE THE VIDEO", self)
-        self.add_images_button.setGeometry(620, 438, 250, 40)  # x, y, width, height
+        self.add_images_button.setGeometry(617, 438, 250, 40)  # x, y, width, height
         self.add_images_button.setStyleSheet("""
             QPushButton {
                 font-family: Muli;  
@@ -123,7 +123,8 @@ class FaceRecognitionUI(QWidget):
             for col in range(4):
                 placeholder = QLabel("[+]", self)
                 placeholder.setStyleSheet(
-                    "background-color: #cccccc; border: 1px dashed #999; color: #666; font-size: 16px; text-align: center;"
+                    """background-color: #004651; border: 1px dashed #999; color: white;
+                    font-size: 25px; text-align: center;border-radius: 10px"""
                 )
                 placeholder.setAlignment(Qt.AlignCenter)
                 self.grid_layout.addWidget(placeholder, row, col)
@@ -166,7 +167,7 @@ class FaceRecognitionUI(QWidget):
             # Nút xóa
             delete_button = QPushButton("X", image_container)
             delete_button.setStyleSheet(
-                "background-color: red; color: white; font-size: 12px; font-weight: bold; border-radius: 10px;"
+                "background-color:#00a181 ; color: white; font-size: 12px; font-weight: bold; border-radius: 10px;"
             )
             delete_button.clicked.connect(lambda _, p=path: self.remove_image(p))
 
@@ -189,7 +190,7 @@ class FaceRecognitionUI(QWidget):
 
     def remove_image(self, path):
         """Xóa ảnh khỏi mảng và cập nhật lưới."""
-        self.image_paths.remove(path)  # Xóa đường dẫn ảnh khỏi mảng
+        self.image_paths.remove(path)  
         self.update_grid()
 
     def add_video(self):
