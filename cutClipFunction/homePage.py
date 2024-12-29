@@ -7,6 +7,8 @@ from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QUrl
 import sys
+from input import inputProcess
+from executePage import SecondWindow
 
 
 style = """
@@ -31,6 +33,7 @@ class FaceRecognitionUI(QWidget):
         super().__init__()
         self.image_paths = []  # Mảng lưu trữ đường dẫn ảnh
         self.initUI()
+        self.video_path=""
 
     def initUI(self):
         # Set background image and window size
@@ -104,7 +107,7 @@ class FaceRecognitionUI(QWidget):
         icon = QIcon("rock3.png")  # Replace with your icon path
         self.launch_button.setIcon(icon)
         self.launch_button.setIconSize(self.launch_button.size() * 0.87)
-        self.launch_button.clicked.connect(self.show_help)
+        self.launch_button.clicked.connect(self.launch)
 
     def set_background_and_size(self, image_path):
         pixmap = QPixmap(image_path)
@@ -196,6 +199,7 @@ class FaceRecognitionUI(QWidget):
     def add_video(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Select Video", "", "Video Files (*.mp4 *.avi *.mov *.mkv)")
         if filename:
+            self.video_path=filename
             QMessageBox.information(self, "Video Added", f"You selected: {filename}")
 
             self.video_player = QMediaPlayer(self)
@@ -208,8 +212,14 @@ class FaceRecognitionUI(QWidget):
             self.video_player.setSource(QUrl.fromLocalFile(filename))
             self.video_player.play()
 
-    def show_help(self):
-        QMessageBox.information(self, "Help", "This is the help section. Provide guidance to the user here.")
+    def launch(self):
+       faceIn=inputProcess(images_path=self.image_paths,video_path=self.video_path)
+       if(faceIn==[0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images.
+                                                 Make sure that images have face!!!""")
+       else:
+           self.secondWindow= SecondWindow()
+           self.secondWindow.show()
+       
 
 
 if __name__ == "__main__":
@@ -217,3 +227,7 @@ if __name__ == "__main__":
     window = FaceRecognitionUI()
     window.show()
     sys.exit(app.exec())
+
+
+
+#đã nối homepage với input , thực hiện Preprocessing, bây giờ cần thực hiện truyền 

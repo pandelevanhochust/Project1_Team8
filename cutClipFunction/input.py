@@ -64,28 +64,19 @@ def face_encodings(image, model):
                 if face_enc:
                     encodings.append(face_enc[0])
     return encodings
-
+imageInput=[]
+video_path=""
+faceInInput=[]
+def inputProcess(images_path,video_path):
 # Load and preprocess reference images and video
-imageInput1 = [
-    "D:\PyLesson\Photos\hanni1.png",
-    "D:\PyLesson\Photos\hanni2.png",
-    "D:\PyLesson\Photos\hanni3.png",
-    "D:\PyLesson\Photos\hanni4.png",
-    "D:\PyLesson\Photos\hanni5.png",
+    imageInput=[convert_to_jpg(img) for img in images_path]
     
-]
 
-imageInput=[convert_to_jpg(img) for img in imageInput1]
+    argImages = preprocess([cv.imread(img) for img in imageInput])
+    faceInInput = [enc for img in argImages for enc in face_encodings(img, model)]
+    faceInInput=faceInInput
+    images_path=images_path
+    video_path=video_path
+    if len(faceInInput) == 0:
+       return [0]
 
-video_path = "D:\\PyLesson\\Photos\\eta.mp4"
-cap = cv.VideoCapture(video_path)
-
-
-#get all the params:
-
-argImages = preprocess([cv.imread(img) for img in imageInput])
-faceInInput = [enc for img in argImages for enc in face_encodings(img, model)]
-
-if len(faceInInput) == 0:
-    print("There're no faces in the images. Please choose other images!")
-    exit(0)
