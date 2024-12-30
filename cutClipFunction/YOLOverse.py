@@ -2,27 +2,12 @@ import cv2 as cv
 import numpy as np
 from moviepy import VideoFileClip, concatenate_videoclips
 import face_recognition
-from trackFunction import get_action_descriptions,tracker,actions,classes_name
+#from trackFunction import get_action_descriptions,tracker,actions,classes_name
 from input import *
 
 # Load YOLO model
+cap = cv.VideoCapture(video_path)
 
-
-
-def tracking(detections, frame):
-    colors = np.random.randint(0,255, size=(len(classes_name),3 ))
-    tracks = tracker.update_tracks(detections, frame=frame)
-    for track in tracks:
-        if not track.is_confirmed():
-            continue
-        track_id = track.track_id  # ID theo dõi
-        ltrb = track.to_ltrb()  # Toạ độ bounding box (left, top, right, bottom)
-        cv.rectangle(frame, (int(ltrb[0]), int(ltrb[1])), (int(ltrb[2]), int(ltrb[3])), colors, 2)
-        cv.putText(frame, f"ID: {track_id}", (int(ltrb[0]), int(ltrb[1] - 10)),
-                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-    # Hiển thị frame
-    cv.imshow("DeepSort Tracking", frame)
 
 
 
@@ -86,7 +71,7 @@ while cap.isOpened():
                 break
             
     # decriptions=get_action_descriptions(detected_objects,actions)        
-    tracking(detections,frame)  
+   # tracking(detections,frame)  
          
 
     if face_detected:
@@ -136,7 +121,7 @@ cap.release()
 
 
 
-#Export video:
+
 output_path = "D:\\PyLesson\\Videos\\YOLOKhanhNgoc.mp4"
 if clips:
     for clip_info in clipsDetail:
@@ -149,9 +134,3 @@ else:
     print("Oops i did it again!!")
 
 
-#24/12: tìm cách chèn ô nhận diện vào trong video được xuất ra sử dụng thư viện PIL
-#kiểm tra lại điều kiện nhận diện : nếu xuất hiện nhiều hơn 2 người trong 1 frame thì phải để cho tolerance là 0.4 
-# còn nếu chỉ có 1 thì tol=0.6
-# phải thiết kế khung cho chủ thể có màu hồng 
-# với vid có nhiều chủ thể thì đối tượng nhận diện đang tè le==> phải đưa ra cảnh báo về input đầu vào là nếu 
-#trong vid có nhiều chủ thể quá thì cần phải đưa vào nhiều input đủ góc độ

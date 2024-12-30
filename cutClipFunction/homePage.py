@@ -7,6 +7,8 @@ from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QUrl
 import sys
+from input import inputProcess
+from executePage import SecondWindow
 
 
 style = """
@@ -31,6 +33,7 @@ class FaceRecognitionUI(QWidget):
         super().__init__()
         self.image_paths = []  # Mảng lưu trữ đường dẫn ảnh
         self.initUI()
+        self.video_path=""
 
     def initUI(self):
         # Set background image and window size
@@ -48,7 +51,7 @@ class FaceRecognitionUI(QWidget):
         # Image Grid Area
         self.image_preview = QWidget(self)
         self.image_preview.setGeometry(0, 245, 350, 200)  # Kích thước vừa phải cho lưới 2x4
-        self.image_preview.setStyleSheet("background-color: #eeeeee; border: 1px solid #ccc;")
+        self.image_preview.setStyleSheet("background-color: #eeeeee; border: 1px solid #ccc;border-radius: 10px")
         self.grid_layout = QGridLayout(self.image_preview)  # Lưới hiển thị ảnh
         self.grid_layout.setContentsMargins(5, 5, 5, 5)
         self.grid_layout.setSpacing(10)
@@ -68,7 +71,7 @@ class FaceRecognitionUI(QWidget):
         self.video_preview.setAlignment(Qt.AlignCenter)
         
         self.add_images_button = QPushButton("CHANGE THE VIDEO", self)
-        self.add_images_button.setGeometry(620, 438, 250, 40)  # x, y, width, height
+        self.add_images_button.setGeometry(617, 438, 250, 40)  # x, y, width, height
         self.add_images_button.setStyleSheet("""
             QPushButton {
                 font-family: Muli;  
@@ -104,7 +107,7 @@ class FaceRecognitionUI(QWidget):
         icon = QIcon("rock3.png")  # Replace with your icon path
         self.launch_button.setIcon(icon)
         self.launch_button.setIconSize(self.launch_button.size() * 0.87)
-        self.launch_button.clicked.connect(self.show_help)
+        self.launch_button.clicked.connect(self.launch)
 
     def set_background_and_size(self, image_path):
         pixmap = QPixmap(image_path)
@@ -123,7 +126,8 @@ class FaceRecognitionUI(QWidget):
             for col in range(4):
                 placeholder = QLabel("[+]", self)
                 placeholder.setStyleSheet(
-                    "background-color: #cccccc; border: 1px dashed #999; color: #666; font-size: 16px; text-align: center;"
+                    """background-color: #004651; border: 1px dashed #999; color: white;
+                    font-size: 25px; text-align: center;border-radius: 10px"""
                 )
                 placeholder.setAlignment(Qt.AlignCenter)
                 self.grid_layout.addWidget(placeholder, row, col)
@@ -166,7 +170,7 @@ class FaceRecognitionUI(QWidget):
             # Nút xóa
             delete_button = QPushButton("X", image_container)
             delete_button.setStyleSheet(
-                "background-color: red; color: white; font-size: 12px; font-weight: bold; border-radius: 10px;"
+                "background-color:#00a181 ; color: white; font-size: 12px; font-weight: bold; border-radius: 10px;"
             )
             delete_button.clicked.connect(lambda _, p=path: self.remove_image(p))
 
@@ -189,12 +193,13 @@ class FaceRecognitionUI(QWidget):
 
     def remove_image(self, path):
         """Xóa ảnh khỏi mảng và cập nhật lưới."""
-        self.image_paths.remove(path)  # Xóa đường dẫn ảnh khỏi mảng
+        self.image_paths.remove(path)  
         self.update_grid()
 
     def add_video(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Select Video", "", "Video Files (*.mp4 *.avi *.mov *.mkv)")
         if filename:
+            self.video_path=filename
             QMessageBox.information(self, "Video Added", f"You selected: {filename}")
 
             self.video_player = QMediaPlayer(self)
@@ -207,8 +212,14 @@ class FaceRecognitionUI(QWidget):
             self.video_player.setSource(QUrl.fromLocalFile(filename))
             self.video_player.play()
 
-    def show_help(self):
-        QMessageBox.information(self, "Help", "This is the help section. Provide guidance to the user here.")
+    def launch(self):
+       faceIn=inputProcess(images_path=self.image_paths,video_path=self.video_path)
+       if(faceIn==[0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images.
+                                                 Make sure that images have face!!!""")
+       else:
+           self.secondWindow= SecondWindow()
+           self.secondWindow.show()
+       
 
 
 if __name__ == "__main__":
@@ -216,3 +227,7 @@ if __name__ == "__main__":
     window = FaceRecognitionUI()
     window.show()
     sys.exit(app.exec())
+
+
+
+#đã nối homepage với input , thực hiện Preprocessing, bây giờ cần thực hiện truyền 
