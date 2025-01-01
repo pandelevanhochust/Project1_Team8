@@ -13,10 +13,13 @@ from thirdPage import ThirdWindow
 
 
 class SecondWindow(QWidget):
-    isClose=False
-    
+    isClose = False
+
     def __init__(self):
         super().__init__()
+        self.cap = None  # OpenCV VideoCapture object
+        # self.timer = QTimer(self)  # Timer để tự động cập nhật frame
+        # self.timer.timeout.connect(self.update_frame)  # Liên kết với phương thức update_frame
         self.initUI()
 
     def initUI(self):
@@ -59,29 +62,14 @@ class SecondWindow(QWidget):
             }
         """)
         self.finishButton.clicked.connect(self.confirm)
+        
+
     def confirm(self):
-        self.window=ThirdWindow()
-        self.window.show()
+        self.isClose = True
+        self.win=ThirdWindow("D:\\PyLesson\\Ellish_BirdOfFeatther.mp4")
+        self.win.show()
         self.close()
-        self.isClose=True
-         
-    
-    def add_video(self, frame):
-    
-        if frame is not None:
-            # Chuyển đổi frame từ BGR sang RGB
-            frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-            height, width, channel = frame_rgb.shape
-            bytes_per_line = channel * width
-            # Chuyển frame thành QImage
-            qimg = QImage(frame_rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
-            pixmap = QPixmap.fromImage(qimg).scaled(
-                self.video_preview.width(),
-                self.video_preview.height(),
-                Qt.KeepAspectRatio
-            )
-            # Hiển thị pixmap trên video_preview
-            self.video_preview.setPixmap(pixmap)
+        
         
         
 if __name__ == "__main__":
