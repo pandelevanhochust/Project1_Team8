@@ -8,7 +8,8 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QUrl
 import sys
 from input import inputProcess
-from executePage import SecondWindow
+from YOLOverse import execute
+from thirdPage import ThirdWindow
 
 
 style = """
@@ -213,12 +214,16 @@ class FaceRecognitionUI(QWidget):
             self.video_player.play()
 
     def launch(self):
-       faceIn=inputProcess(images_path=self.image_paths,video_path=self.video_path)
-       if(faceIn==[0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images.
+       [imageInput,faceInInput]=inputProcess(images_path=self.image_paths)
+       if(self.video_path=="" or [imageInput,faceInInput]==[0,0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images.
                                                  Make sure that images have face!!!""")
-       else:
-           self.secondWindow= SecondWindow()
-           self.secondWindow.show()
+       else : 
+           output_path,clipDetail=execute(imageInput,self.video_path,faceInInput)
+           self.win=ThirdWindow(output_path,clipDetail)
+           self.win.show()
+           
+
+            
        
 
 
@@ -230,4 +235,6 @@ if __name__ == "__main__":
 
 
 
-#đã nối homepage với input , thực hiện Preprocessing, bây giờ cần thực hiện truyền 
+
+
+

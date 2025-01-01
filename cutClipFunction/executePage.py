@@ -1,21 +1,30 @@
 from PySide6.QtWidgets import (
     QApplication, QWidget, QPushButton, QFileDialog, QMessageBox, QGridLayout, QLabel
 )
-from PySide6.QtGui import QPixmap, QPalette, QBrush, QPainter
+import cv2 as cv
+from PySide6.QtGui import QPixmap, QPalette, QBrush, QPainter,QImage
 from PySide6.QtCore import Qt,QRect, QTimer
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QUrl
 import sys
+from thirdPage import ThirdWindow
+
 
 
 class SecondWindow(QWidget):
-    
+    isClose = False
+
     def __init__(self):
         super().__init__()
+        self.cap = None  # OpenCV VideoCapture object
+        # self.timer = QTimer(self)  # Timer để tự động cập nhật frame
+        # self.timer.timeout.connect(self.update_frame)  # Liên kết với phương thức update_frame
         self.initUI()
 
     def initUI(self):
+        
+        
         background_image_path='secondWinn.png'
         pixmap = QPixmap(background_image_path)
         if pixmap.isNull():
@@ -46,31 +55,19 @@ class SecondWindow(QWidget):
                 background-color:  #00a181;
                 padding: 10px;
             }
-            QPushButton {border-radius: 80px;}s
+            QPushButton {border-radius: 80px;}
             QPushButton:hover {
                 background-color: #7ed957;
                 color: #004651;
             }
         """)
         self.finishButton.clicked.connect(self.confirm)
+        
+
     def confirm(self):
-        print("yes")
-    
-    def add_video(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Select Video", "", "Video Files (*.mp4 *.avi *.mov *.mkv)")
-        if filename:
-            self.video_path=filename
-            QMessageBox.information(self, "Video Added", f"You selected: {filename}")
-
-            self.video_player = QMediaPlayer(self)
-            self.video_widget = QVideoWidget(self)
-
-            self.video_widget.setGeometry(620, 222, 300, 200)
-            self.video_widget.show()
-
-            self.video_player.setVideoOutput(self.video_widget)
-            self.video_player.setSource(QUrl.fromLocalFile(filename))
-            self.video_player.play()
+        self.isClose = True
+        self.close()
+        
         
         
 if __name__ == "__main__":

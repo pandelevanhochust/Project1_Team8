@@ -3,6 +3,7 @@ import cv2 as cv
 import os
 import face_recognition
 from ultralytics import YOLO
+from YOLOverse import face_encodings
 
 model = YOLO("yolo11m.pt")
 
@@ -51,32 +52,19 @@ def preprocess(images):
     return argImages
 
 
-def face_encodings(image, model):
-    results = model.predict(source=image, conf=0.5)
-    encodings = []
-    for result in results:
-        for box in result.boxes.xyxy:
-            x1, y1, x2, y2 = map(int, box)  # Bounding box coordinates
-            face_crop = image[y1:y2, x1:x2]
-            face_crop_rgb = cv.cvtColor(face_crop, cv.COLOR_BGR2RGB)
-            if face_crop_rgb.shape[0] >= 10 and face_crop_rgb.shape[1] >= 10:
-                face_enc = face_recognition.face_encodings(face_crop_rgb)
-                if face_enc:
-                    encodings.append(face_enc[0])
-    return encodings
+
 imageInput=[]
 video_path=""
 faceInInput=[]
-def inputProcess(images_path,video_path):
+def inputProcess(images_path):
 # Load and preprocess reference images and video
     imageInput=[convert_to_jpg(img) for img in images_path]
     
 
     argImages = preprocess([cv.imread(img) for img in imageInput])
     faceInInput = [enc for img in argImages for enc in face_encodings(img, model)]
-    faceInInput=faceInInput
     images_path=images_path
-    video_path=video_path
     if len(faceInInput) == 0:
-       return [0]
-
+       return [0,0]
+    else: return [imageInput,faceInInput]
+    
