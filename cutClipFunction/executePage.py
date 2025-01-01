@@ -66,8 +66,6 @@ class SecondWindow(QWidget):
 
     def confirm(self):
         self.isClose = True
-        self.win=ThirdWindow("D:\\PyLesson\\Ellish_BirdOfFeatther.mp4")
-        self.win.show()
         self.close()
         
         

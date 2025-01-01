@@ -30,26 +30,25 @@ def execute(imageInput,video_path,faceInInput):
     window.show()
     
     tolerance = 0.6
-    fps = int(cap.get(cv.CAP_PROP_FPS)/2)
+    fps = int(cap.get(cv.CAP_PROP_FPS))   # chỉnh fps còn 1 nửa gây ra lỗi 
     width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
     frame_count = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
     duration = frame_count / fps
     
 
-    face_timestamps = []
     frame_number = 0
     clips = []
     currStart = None
     latestFace = -1
-    limitClipLen = int(2 * fps)
+    limitClipLen = fps
     last_clip_end_time = 0
     finetuneImages=10- len(imageInput)  #set the needed images is 10
     #Create dict to save the detail of each clips:
-    clipsDetail= []
-    detections=[]    
+    clipsDetail= [] 
 # main code :
     while cap.isOpened():
+        #bắt đầu thêm các tính năng từ đây
         ret, frame = cap.read()
         if not ret:
             print("The video will be exported in seconds")
@@ -60,7 +59,7 @@ def execute(imageInput,video_path,faceInInput):
         
         
         
-        if frame_number % 2 == 0:   # reduce the frame process
+        if frame_number % 4 == 0:   # reduce the frame process
             results = model.predict(source=frame, conf=0.5)    #adjust the conf and size here
             
             
@@ -69,7 +68,6 @@ def execute(imageInput,video_path,faceInInput):
         
         for result in results:
             for box in result.boxes.data:
-                print(box)
                 x1, y1, x2, y2 = map(int, box[:4])  # Bounding box coordinates
                 face_crop = frame[y1:y2, x1:x2]
                 face_crop_encodings = face_encodings(face_crop, model)
@@ -107,7 +105,7 @@ def execute(imageInput,video_path,faceInInput):
                     "detected_objects": list(detected_objects)
                 })
                 
-                        
+                        # đang bị mắc 1 lỗi ở lúc nhập clip khi start_time >duration
                 clip = VideoFileClip(video_path).subclipped(currStart, end_time)
                 clips.append(clip)
                 if finetuneImages:
@@ -153,7 +151,6 @@ def execute(imageInput,video_path,faceInInput):
 
     else:
         print("Oops i did it again!!")
-        #nếu không bắn log
 
 
 #file gốc YOLO nằm ở đây

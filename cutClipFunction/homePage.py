@@ -235,11 +235,6 @@ if __name__ == "__main__":
 
 
 
-#31/12: project đang gặp vấn đề ở Page 2 , cần tìm cách khác để triển khai :
-# không thể nối frame vào với Window , có nên loại bỏ Window không
-# nếu cố chấp nối thì cũng bị treo hoặc phải chỉnh cả excecute-> không nên
-# Thêm nữa là việc phải giữ nguyên main code để thực hiện nối bài
 
-#phương án được lựa chọn là chạy frame ở window riêng , còn cửa sổ second window riêng
 
 
