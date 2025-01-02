@@ -6,6 +6,8 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 import sys
+import cv2
+
 
 
 class ThirdWindow(QWidget):
@@ -61,7 +63,7 @@ class ThirdWindow(QWidget):
         self.finishButton.clicked.connect(self.confirm)
         
         self.image_preview = QWidget(self)
-        self.image_preview.setGeometry(0, 230, 200, 200)  # Kích thước hiển thị
+        self.image_preview.setGeometry(0, 230, 120, 200)  # Kích thước hiển thị
         self.image_preview.setStyleSheet("background-color: #eeeeee; border: 1px solid #ccc; border-radius: 10px;")
         
         # Tạo lưới hiển thị bên trong widget con
@@ -93,6 +95,9 @@ class ThirdWindow(QWidget):
         
     def add_buttons_to_grid(self, data_list):
         for index, clip in enumerate(data_list):
+            clip["detected_objects"]=clip["detected_objects"][1:]
+            if(len(clip["detected_objects"])==0 ) : continue
+            
             detected_objects = ", ".join(clip["detected_objects"]) 
             button_text = f"{detected_objects}"
             
@@ -126,24 +131,41 @@ class ThirdWindow(QWidget):
         :param index: Chỉ số của clip.
         :param clip: Thông tin chi tiết của clip (start_time, end_time, detected_objects).
         """
+
         start_time = clip["start_time"]
         end_time = clip["end_time"]
-
-        # Đặt video bắt đầu tại start_time
-        self.media_player.setPosition(start_time * 1000)  # Đơn vị của setPosition là milliseconds
-        self.media_player.play()
-
-        # Theo dõi thời điểm hiện tại và dừng khi đạt end_time
-        def stop_at_end_time(position):
-            if position >= end_time * 1000:  # end_time cũng chuyển sang milliseconds
-                self.media_player.pause()
-                self.media_player.positionChanged.disconnect()  # Ngắt kết nối sau khi dừng
-
-        # Kết nối tín hiệu positionChanged để kiểm tra thời gian
-        self.media_player.positionChanged.connect(stop_at_end_time)
+        self.play_video_from_time(video_path,start_time)
 
         # Hiển thị thông báo xác nhận
-        QMessageBox.information(self, "Playing Clip", f"Playing clip {index + 1} from {start_time}s to {end_time}s.")
+
+    def play_video_from_time(video_path,start_time):
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            print(f"Error: Cannot open video file {video_path}")
+            return
+
+        # Lấy FPS (Frames Per Second) và tính toán frame bắt đầus
+        fps = cap.get(cv2.CAP_PROP_FPS)  # Số khung hình mỗi giây
+        start_frame = int(start_time * fps)
+
+        # Đặt vị trí phát từ frame tương ứng với start_time
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+
+        print(f"Playing video from {start_time} seconds...")
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("End of video or error in reading frame.")
+                break
+
+            cv2.imshow("Video Player", frame)
+            if (cv2.waitKey(int(1000 / fps)) & 0xFF == ord('q')) :
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+
 
 
 
@@ -152,24 +174,35 @@ if __name__ == "__main__":
     
     # Dữ liệu mẫu cho clipsDetail
     clipsDetail = [
-        {
-            "start_time": "00:00:05",
-            "end_time": "00:00:15",
-            "detected_objects": ["Car", "Tree", "Dog"]
-        },
-        {
-            "start_time": "00:01:00",
-            "end_time": "00:01:30",
-            "detected_objects": ["Person", "Bicycle"]
-        },
-        {
-            "start_time": "00:02:00",
-            "end_time": "00:02:30",
-            "detected_objects": ["Cat", "Bus"]
-        },
+        {'start_time': 5.0, 'end_time': 11.291666666666666, 'detected_objects': ['person']},
+{'start_time': 11.291666666666666, 'end_time': 15.583333333333334, 'detected_objects': ['person']},
+{'start_time': 15.583333333333334, 'end_time': 19.416666666666668, 'detected_objects': ['person']},
+{'start_time': 20.625, 'end_time': 24.208333333333332, 'detected_objects': ['person']},
+{'start_time': 24.208333333333332, 'end_time': 37.208333333333336, 'detected_objects': ['person']},
+{'start_time': 37.5, 'end_time': 41.708333333333336, 'detected_objects': ['person', 'chair']},
+{'start_time': 43.541666666666664, 'end_time': 52.583333333333336, 'detected_objects': ['person']},
+{'start_time': 52.833333333333336, 'end_time': 59.666666666666664, 'detected_objects': ['person']},
+{'start_time': 59.666666666666664, 'end_time': 64.75, 'detected_objects': ['person']},
+{'start_time': 64.75, 'end_time': 66.08333333333333, 'detected_objects': ['person']},
+{'start_time': 72.29166666666667, 'end_time': 75.33333333333333, 'detected_objects': ['person']},
+{'start_time': 76.0, 'end_time': 79.08333333333333, 'detected_objects': ['person']},
+{'start_time': 79.08333333333333, 'end_time': 83.0, 'detected_objects': ['person']},
+{'start_time': 83.33333333333333, 'end_time': 87.04166666666667, 'detected_objects': ['person', 'chair']},
+{'start_time': 87.04166666666667, 'end_time': 89.70833333333333, 'detected_objects': ['person']},
+{'start_time': 89.70833333333333, 'end_time': 91.875, 'detected_objects': ['person']},
+{'start_time': 98.16666666666667, 'end_time': 102.75, 'detected_objects': ['person']},
+{'start_time': 110.66666666666667, 'end_time': 113.91666666666667, 'detected_objects': ['person']},
+{'start_time': 114.875, 'end_time': 119.91666666666667, 'detected_objects': ['person']},
+{'start_time': 119.91666666666667, 'end_time': 123.08333333333333, 'detected_objects': ['person', 'couch']},
+{'start_time': 124.41666666666667, 'end_time': 127.875, 'detected_objects': ['person']},
+{'start_time': 134.83333333333334, 'end_time': 140.04166666666666, 'detected_objects': ['person']},
+{'start_time': 146.29166666666666, 'end_time': 152.375, 'detected_objects': ['snowboard']},
+{'start_time': 172.70833333333334, 'end_time': 176.08333333333334, 'detected_objects': ['person', 'chair']},
+{'start_time': 180.0, 'end_time': 186.41666666666666, 'detected_objects': ['person']},
+       
     ]
     
-    video_path = "D:\\PyLesson\\Ellish_BirdOfFeatther.mp4"  # Thay bằng đường dẫn thực tế
+    video_path = "exportVideo\\KhanhNgoc.mp4"  # Thay bằng đường dẫn thực tế
     window = ThirdWindow(video_path=video_path, clipDetail=clipsDetail)
     window.show()
 
