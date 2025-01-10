@@ -18,14 +18,13 @@ class SecondWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.cap = None  # OpenCV VideoCapture object
-        # self.timer = QTimer(self)  # Timer để tự động cập nhật frame
-        # self.timer.timeout.connect(self.update_frame)  # Liên kết với phương thức update_frame
+        self.timer = QTimer(self)  # Timer để tự động cập nhật frame
+        self.timer.timeout.connect(self.update_frame)  # Liên kết với phương thức update_frame
         self.initUI()
 
     def initUI(self):
-        
-        
-        background_image_path='secondWinn.png'
+
+        background_image_path= 'D:\CODIng\CV\Project1_Team8\secondWinn.png'
         pixmap = QPixmap(background_image_path)
         if pixmap.isNull():
             QMessageBox.critical(self, "Error", f"Failed to load background image: {background_image_path}")
@@ -67,8 +66,37 @@ class SecondWindow(QWidget):
     def confirm(self):
         self.isClose = True
         self.close()
-        
-        
+
+    def start_video(self, video_path):
+        """Start video playback."""
+        self.cap = cv.VideoCapture(video_path)
+        if not self.cap.isOpened():
+            QMessageBox.critical(self, "Error", f"Failed to open video file: {video_path}")
+            return
+
+        self.timer.start(30)  # Update frames every 30ms
+
+    def update_frame(self):
+        """Update QLabel with the current frame."""
+        if self.cap is None or not self.cap.isOpened():
+            return
+
+        ret, frame = self.cap.read()
+        if not ret:
+            self.timer.stop()
+            self.cap.release()
+            return
+
+        # Convert OpenCV frame (BGR to RGB)
+        rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        h, w, ch = rgb_frame.shape
+        bytes_per_line = ch * w
+        qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(qt_image)
+
+        # Set pixmap to QLabel
+        self.video_preview.setPixmap(pixmap)
+        self.video_preview.setScaledContents(True)
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)

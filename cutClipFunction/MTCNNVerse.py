@@ -4,7 +4,6 @@ from mtcnn import MTCNN
 import face_recognition
 from moviepy import VideoFileClip, concatenate_videoclips
 
-
 mtcnn = MTCNN(device='cpu')
 
 def rotate_image(image, angle):
