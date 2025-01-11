@@ -214,8 +214,8 @@ class FaceRecognitionUI(QWidget):
        if(self.video_path=="" or [imageInput,faceInInput]==[0,0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images.
              Make sure that images have face!!!""")
        else : 
-           output_path,clipDetail=execute(imageInput,self.video_path,faceInInput)
-           self.win=ThirdWindow(output_path,clipDetail)
+           output_path,clipDetail,seg_obj,seg_act=execute(imageInput,self.video_path,faceInInput)
+           self.win=ThirdWindow(output_path,clipDetail,seg_obj,seg_act)
            self.win.show()
            
 

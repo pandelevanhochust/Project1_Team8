@@ -106,7 +106,6 @@ def execute(imageInput,video_path,faceInInput):
                     "detected_objects": list(detected_objects)
                 })
                 
-                        # đang bị mắc 1 lỗi ở lúc nhập clip khi start_time >duration
                 clip = VideoFileClip(video_path).subclipped(currStart, end_time)
                 clips.append(clip)
                 if finetuneImages:
