@@ -6,7 +6,7 @@ from PIL import Image
 import os
 import math
 from moviepy.video.io.VideoFileClip import VideoFileClip
-# from YOLOverse import frame
+# from module.YOLOverse import frame, class_id, output_path
 
 # Initialize YOLO model
 model = YOLO('yolo11l.pt')  # Replace with your pretrained YOLO model path

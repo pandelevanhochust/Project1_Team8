@@ -7,10 +7,8 @@ from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QUrl
 import sys
-
-# from cutClipFunction.input import faceInInput
-from input import inputProcess
-from YOLOverse import execute
+from module.input import inputProcess
+from module.YOLOverse import execute
 from thirdPage import ThirdWindow
 # from trackFunction import tracker
 
@@ -41,7 +39,7 @@ class FaceRecognitionUI(QWidget):
 
     def initUI(self):
         # Set background image and window size
-        background_image_path = "D:\\CODIng\\CV\\Project1_Team8\\background.png"
+        background_image_path = "background.png"
         self.set_background_and_size(background_image_path)
         self.setWindowTitle("WhereTheFace")
 
@@ -106,9 +104,9 @@ class FaceRecognitionUI(QWidget):
                 background-color: #7ed957;
             }
         """)
-        icon = QIcon("D:\\CODIng\\CV\\Project1_Team8\\rock3.png")  # Replace with your icon path
+        icon = QIcon("rock3.png")  # Replace with your icon path
         self.launch_button.setIcon(icon)
-        self.launch_button.setIconSize(self.launch_button.size() * 0.6)
+        self.launch_button.setIconSize(self.launch_button.size() * 0.8)
         self.launch_button.clicked.connect(self.launch)
 
     def set_background_and_size(self, image_path):
@@ -212,21 +210,18 @@ class FaceRecognitionUI(QWidget):
             self.video_player.play()
 
     def launch(self):
+       [imageInput,faceInInput]=inputProcess(images_path=self.image_paths)
+       if(self.video_path=="" or [imageInput,faceInInput]==[0,0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images.
+             Make sure that images have face!!!""")
+       else : 
+           output_path,clipDetail=execute(imageInput,self.video_path,faceInInput)
+           self.win=ThirdWindow(output_path,clipDetail)
+           self.win.show()
+           
 
-        #Phan nay dung de test ghep code cua module trackFunction
-        # imageInput = []
-        # faceInInput = []
-        # output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path, faceInInput)
-        #
-        # self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
-        # self.win.show()
+            
+       
 
-       [imageInput,faceInInput]=inputProcess(images_path= self.image_paths)
-       if(self.video_path=="" or [imageInput,faceInInput]==[0,0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images. Make sure that images have face!!!""")
-       else :
-            output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path,faceInInput)
-            self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
-            self.win.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -3,7 +3,7 @@ import cv2 as cv
 import os
 import face_recognition
 from ultralytics import YOLO
-from YOLOverse import face_encodings
+from module.YOLOverse import face_encodings
 
 model = YOLO("yolo11m.pt")
 

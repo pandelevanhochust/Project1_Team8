@@ -1,113 +1,31 @@
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QPushButton, QFileDialog, QMessageBox, QGridLayout, QLabel, QVBoxLayout
+    QApplication, QWidget, QPushButton, QMessageBox, QLabel,QGridLayout
 )
-from PySide6.QtGui import QPixmap, QPalette, QBrush, QIcon
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap, QPalette, QBrush
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
-from PySide6.QtCore import QUrl
 import sys
 
 
-style = """
-            QPushButton {
-                font-family: Muli;  
-                font-size: 15px;
-                font-weight: bold;
-                color: white;
-                background-color:  #00a181;
-                padding: 10px;
-            }
-            QPushButton {border-radius: 27px;}
-            QPushButton:hover {
-                background-color: #7ed957;
-                color: #004651;
-            }
+class ThirdWindow(QWidget):
+    def __init__(self, video_path,clipDetail):
         """
-
-
-class FaceRecognitionUI(QWidget):
-    def __init__(self):
+        ThirdWindow Constructor.
+        :param video_path: Đường dẫn video cần hiển thị (mặc định là None)
+        """
         super().__init__()
-        self.image_paths = []  # Mảng lưu trữ đường dẫn ảnh
+        self.video_path = video_path
+        self.data_list=clipDetail
         self.initUI()
 
+
     def initUI(self):
-        # Set background image and window size
-        background_image_path = "D:\\CODIng\\CV\\Project1_Team8\\background.png"
-        self.set_background_and_size(background_image_path)
-        self.setWindowTitle("WhereTheFace")
-
-        # Add Images Button
-        self.add_images_button = QPushButton("ADD IMAGES HERE", self)
-        self.add_images_button.setGeometry(-20, 186, 205, 55)  # x, y, width, height
-        self.add_images_button.setStyleSheet(style)
-        self.add_images_button.clicked.connect(self.add_images)
-
-        # Image Grid Area
-        self.image_preview = QWidget(self)
-        self.image_preview.setGeometry(0, 245, 350, 200)  # Kích thước vừa phải cho lưới 2x4
-        self.image_preview.setStyleSheet("background-color: #eeeeee; border: 1px solid #ccc;")
-        self.grid_layout = QGridLayout(self.image_preview)  # Lưới hiển thị ảnh
-        self.grid_layout.setContentsMargins(5, 5, 5, 5)
-        self.grid_layout.setSpacing(10)
-        self.init_empty_grid()
-
-        # Add Video Button
-        self.add_video_button = QPushButton("ADD VIDEO HERE", self)
-        self.add_video_button.setGeometry(755, 101, 210, 55)  # x, y, width, height
-        self.add_video_button.setStyleSheet(style)
-        self.add_video_button.clicked.connect(self.add_video)
-
-        # Video Preview Area
-        self.video_preview = QLabel("[Video Preview Area]", self)
-        self.video_preview.setGeometry(620, 222, 300, 200)  # x, y, width, height
-        self.video_preview.setStyleSheet("background-color: #cccccc; border: 1px solid #999; font-size: 14px;")
-        self.video_preview.setAlignment(Qt.AlignCenter)
-        
-        self.add_images_button = QPushButton("CHANGE THE VIDEO", self)
-        self.add_images_button.setGeometry(620, 438, 250, 40)  # x, y, width, height
-        self.add_images_button.setStyleSheet("""
-            QPushButton {
-                font-family: Muli;  
-                font-size: 15px;
-                font-weight: bold;
-                color: white;
-                background-color:  #00a181;
-                padding: 10px;
-            }
-            QPushButton {border-radius: 4px;}
-            QPushButton:hover {
-                background-color: #7ed957;
-                color: #004651;
-            }
-        """)
-        self.add_images_button.clicked.connect(self.add_video)
-
-        # Launch Button (Circular)
-        self.launch_button = QPushButton(self)
-        self.launch_button.setGeometry(412, 242, 185, 185)  # x, y, width, height
-        self.launch_button.setStyleSheet("""
-            QPushButton {
-                font-size: 14px;
-                font-weight: bold;
-                color: white;
-                background-color:  #00a181;
-                border-radius: 90px;  
-            }
-            QPushButton:hover {
-                background-color: #7ed957;
-            }
-        """)
-        icon = QIcon("rock3.png")  # Replace with your icon path
-        self.launch_button.setIcon(icon)
-        self.launch_button.setIconSize(self.launch_button.size() * 0.87)
-        self.launch_button.clicked.connect(self.show_help)
-
-    def set_background_and_size(self, image_path):
-        pixmap = QPixmap(image_path)
+        # Cài đặt hình nền
+        background_image_path = 'thirdPage.png'
+        pixmap = QPixmap(background_image_path)
         if pixmap.isNull():
-            QMessageBox.critical(self, "Error", f"Failed to load background image: {image_path}")
+            QMessageBox.critical(self, "Error", f"Failed to load background image: {background_image_path}")
             sys.exit(1)
 
         self.setFixedSize(pixmap.width(), pixmap.height())
@@ -115,102 +33,133 @@ class FaceRecognitionUI(QWidget):
         palette.setBrush(QPalette.Window, QBrush(pixmap))
         self.setPalette(palette)
 
-    def init_empty_grid(self):
-        """Khởi tạo lưới trống 2x4."""
-        for row in range(2):
-            for col in range(4):
-                placeholder = QLabel("[+]", self)
-                placeholder.setStyleSheet(
-                    "background-color: #cccccc; border: 1px dashed #999; color: #666; font-size: 16px; text-align: center;"
-                )
-                placeholder.setAlignment(Qt.AlignCenter)
-                self.grid_layout.addWidget(placeholder, row, col)
+        self.setWindowTitle("Third Window")
 
-    def add_images(self):
-        filenames, _ = QFileDialog.getOpenFileNames(self, "Select Images", "", "Image Files (*.jpg *.jpeg *.png *.bmp *.gif)")
-        if not filenames:
-            return
+        # Khu vực xem video
+        self.video_widget = QVideoWidget(self)
+        self.video_widget.setGeometry(310, 45, 721, 405)  # x, y, width, height
+        self.video_widget.setStyleSheet("background-color: #000; border: 1px solid #999;")
 
-        for filename in filenames:
-            if len(self.image_paths) >= 8:
-                QMessageBox.warning(self, "Grid Full", "The grid is full. Please remove some images to add new ones.")
-                break
+        # Nút HOME
+        self.finishButton = QPushButton("RETURN HOME", self)
+        self.finishButton.setGeometry(740, 485, 270, 60)  # x, y, width, height
+        self.finishButton.setStyleSheet("""
+            QPushButton {
+                font-family: Muli;  
+                font-size: 30px;
+                font-weight: bold;
+                color: white;
+                background-color:  #00a181;
+                padding: 10px;
+            }
+            QPushButton {border-radius: 30px;}
+            QPushButton:hover {
+                background-color: #7ed957;
+                color: #004651;
+            }
+        """)
+        self.finishButton.clicked.connect(self.confirm)
+        
+        self.image_preview = QWidget(self)
+        self.image_preview.setGeometry(0, 230, 120, 200)  # Kích thước hiển thị
+        self.image_preview.setStyleSheet("background-color: #eeeeee; border: 1px solid #ccc; border-radius: 10px;")
+        
+        # Tạo lưới hiển thị bên trong widget con
+        self.grid_layout = QGridLayout(self.image_preview)
+        self.grid_layout.setContentsMargins(5, 5, 5, 5)  # Lề xung quanh
+        self.grid_layout.setSpacing(5)  # Khoảng cách giữa các ô
 
-            self.image_paths.append(filename)  # Lưu đường dẫn ảnh
-            self.update_grid()
+        # Thêm các nút vào lưới
+        self.add_buttons_to_grid(self.data_list)
 
-    def update_grid(self):
-        """Cập nhật lưới hiển thị ảnh."""
-        # Xóa tất cả widget trong lưới
-        for i in reversed(range(self.grid_layout.count())):
-            widget_to_remove = self.grid_layout.itemAt(i).widget()
-            if widget_to_remove is not None:
-                widget_to_remove.setParent(None)
+        # Khởi tạo MediaPlayer
+        self.media_player = QMediaPlayer(self)
+        self.media_player.setVideoOutput(self.video_widget)
 
-        # Thêm ảnh và nút xóa vào lưới
-        for idx, path in enumerate(self.image_paths):
-            row, col = divmod(idx, 4)  # Tính toán vị trí hàng và cột
+        # Nếu có đường dẫn video, hiển thị ngay
+        if self.video_path:
+            self.play_video(self.video_path)
 
-            # Tạo QLabel hiển thị ảnh
-            image_container = QWidget(self)
-            layout = QVBoxLayout(image_container)
-            layout.setContentsMargins(0, 0, 0, 0)
+    def confirm(self):
+        self.close()
 
-            image_label = QLabel(image_container)
-            pixmap = QPixmap(path).scaled(80, 80, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            image_label.setPixmap(pixmap)
-            image_label.setAlignment(Qt.AlignCenter)
+    def play_video(self, video_path):
+        self.media_player.setSource(QUrl.fromLocalFile(video_path))
+        self.media_player.play()
 
-            # Nút xóa
-            delete_button = QPushButton("X", image_container)
-            delete_button.setStyleSheet(
-                "background-color: red; color: white; font-size: 12px; font-weight: bold; border-radius: 10px;"
-            )
-            delete_button.clicked.connect(lambda _, p=path: self.remove_image(p))
+    def set_video_path(self, video_path):
+        self.video_path = video_path
+        self.play_video(video_path)
+        
+    def add_buttons_to_grid(self, data_list):
+        for index, clip in enumerate(data_list):
+            clip["detected_objects"]=clip["detected_objects"][1:]
+            if(len(clip["detected_objects"])==0 ) : continue
+            
+            detected_objects = ", ".join(clip["detected_objects"]) 
+            button_text = f"{detected_objects}"
+            
+            # Tạo nút
+            button = QPushButton(button_text, self)
+            button.setStyleSheet("""
+            QPushButton {
+                font-family: Muli;  
+                font-size: 16px;
+                font-weight: bold;
+                color: white;
+                background-color:  #00a181;
+                padding: 10px;
+            }
+            QPushButton {border-radius: 10px;}
+            QPushButton:hover {
+                background-color: #7ed957;
+                color: #004651;
+            }
+        """)
+            
+            # Kết nối nút với sự kiện bấm
+            button.clicked.connect(lambda _, idx=index: self.handle_button_click(idx, clip))
+            self.grid_layout.addWidget(button, index, 0)  # Thêm nút vào lưới ở hàng index, cột 0
 
-            # Thêm QLabel và nút xóa vào container
-            layout.addWidget(image_label)
-            layout.addWidget(delete_button, alignment=Qt.AlignCenter)
 
-            # Thêm container vào lưới
-            self.grid_layout.addWidget(image_container, row, col)
+    def handle_button_click(self, index, clip):
+        """
+        Xử lý sự kiện khi nút được nhấn.
+        Phát video từ thời điểm start_time đến end_time.
+        :param index: Chỉ số của clip.
+        :param clip: Thông tin chi tiết của clip (start_time, end_time, detected_objects).
+        """
+        start_time = clip["start_time"]
+        end_time = clip["end_time"]
+        self.media_player.setSource(QUrl.fromLocalFile(video_path))
+        self.media_player.setVideoOutput(self.video_widget)
+        # Đặt video bắt đầu tại start_time
+        self.media_player.setPosition(int(start_time) *1000)  
+        self.media_player.play()
 
-        # Điền các ô trống còn lại trong lưới
-        for idx in range(len(self.image_paths), 8):
-            row, col = divmod(idx, 4)
-            placeholder = QLabel("[+]", self)
-            placeholder.setStyleSheet(
-                "background-color: #cccccc; border: 1px dashed #999; color: #666; font-size: 16px; text-align: center;"
-            )
-            placeholder.setAlignment(Qt.AlignCenter)
-            self.grid_layout.addWidget(placeholder, row, col)
+        # Theo dõi thời điểm hiện tại và dừng khi đạt end_time
+        def stop_at_end_time(position):
+            if position >= int(end_time) * 1000:  # end_time cũng chuyển sang milliseconds
+                self.media_player.pause()
+                
 
-    def remove_image(self, path):
-        """Xóa ảnh khỏi mảng và cập nhật lưới."""
-        self.image_paths.remove(path)  # Xóa đường dẫn ảnh khỏi mảng
-        self.update_grid()
+        # Kết nối tín hiệu positionChanged để kiểm tra thời gian
+        self.media_player.positionChanged.connect(stop_at_end_time)
 
-    def add_video(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Select Video", "", "Video Files (*.mp4 *.avi *.mov *.mkv)")
-        if filename:
-            QMessageBox.information(self, "Video Added", f"You selected: {filename}")
+        # Hiển thị thông báo xác nhận
 
-            self.video_player = QMediaPlayer(self)
-            self.video_widget = QVideoWidget(self)
-
-            self.video_widget.setGeometry(620, 222, 300, 200)
-            self.video_widget.show()
-
-            self.video_player.setVideoOutput(self.video_widget)
-            self.video_player.setSource(QUrl.fromLocalFile(filename))
-            self.video_player.play()
-
-    def show_help(self):
-        QMessageBox.information(self, "Help", "This is the help section. Provide guidance to the user here.")
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = FaceRecognitionUI()
+    
+    # Dữ liệu mẫu cho clipsDetail
+    clipsDetail = [
+       
+    ]
+    
+    video_path = "exportVideo\\KhanhNgoc.mp4"  # Thay bằng đường dẫn thực tế
+    window = ThirdWindow(video_path=video_path, clipDetail=clipsDetail)
     window.show()
+
     sys.exit(app.exec())

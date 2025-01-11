@@ -133,7 +133,7 @@ def execute(imageInput,video_path,faceInInput):
     segmented_objects = object_segmentation(video_path)
     segmented_actions = action_segmentation(video_path)
 
-    output_path = "D:\CODIng\CV\Project1_Team8"
+    output_path = "exportVideo\\NewVideo.mp4"
     if clips:
         for clip_info in clipsDetail:
             print(clip_info)
@@ -145,7 +145,7 @@ def execute(imageInput,video_path,faceInInput):
         return output_path,clipsDetail,segmented_objects,segmented_actions
 
     else:
-        print("Oops i did it again!!")
+        print("Oops! I did it again!! I couldn't get any clip which having her face")
 
 
 #file gốc YOLO nằm ở đây

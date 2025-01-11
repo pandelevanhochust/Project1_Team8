@@ -24,7 +24,7 @@ class SecondWindow(QWidget):
 
     def initUI(self):
 
-        background_image_path= 'D:\CODIng\CV\Project1_Team8\secondWinn.png'
+        background_image_path= 'secondWinn.png'
         pixmap = QPixmap(background_image_path)
         if pixmap.isNull():
             QMessageBox.critical(self, "Error", f"Failed to load background image: {background_image_path}")
