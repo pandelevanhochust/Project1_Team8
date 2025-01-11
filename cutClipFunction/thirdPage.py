@@ -1,12 +1,11 @@
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QPushButton, QMessageBox, QLabel, QGridLayout
+    QApplication, QWidget, QPushButton, QMessageBox, QLabel, QGridLayout,QScrollArea, QVBoxLayout
 )
 from PySide6.QtGui import QPixmap, QPalette, QBrush
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 import sys
-
 
 class ThirdWindow(QWidget):
     def __init__(self, video_path, clipDetail,segmented_objects,segmented_actions):
@@ -83,6 +82,18 @@ class ThirdWindow(QWidget):
 
         # Thêm các nút vào lưới
         # self.add_buttons_to_grid(self.data_list)
+        self.extra_layout_container_below = QWidget(self)  # A new container widget
+        self.extra_layout_container_below.setStyleSheet(
+            "background-color: #00a181; border: none;")  # Set green background color and remove border
+        self.extra_layout_container_below.setFixedSize(500, 100)  # Adjust width and height
+        self.extra_layout_container_below.move(self.image_preview.x() + 15,
+                                               self.image_preview.y() + self.image_preview.height() + 40)
+
+        self.extra_grid_layout = QGridLayout(self.extra_layout_container_below)
+        self.extra_grid_layout.setContentsMargins(5, 5, 5, 5)  # Set small margins
+        self.extra_grid_layout.setSpacing(5)  # Spacing between buttons
+        self.extra_grid_layout.setAlignment(Qt.AlignTop)  # Align buttons to the top
+
         self.add_buttons_to_grid()
 
         # Khởi tạo MediaPlayer
@@ -123,17 +134,15 @@ class ThirdWindow(QWidget):
 
         for index, clip in enumerate(self.data_list):
             button_text = f"Faces: (Frames {clip['start_time']} - {clip['end_time']})"
-            face_button = QPushButton(button_text, self)
+            face_button = QPushButton(button_text, self.extra_layout_container_below)  # Add to green area
             face_button.setStyleSheet(self.object_style())
-            face_button.setFixedSize(800, 20)
+            face_button.setFixedSize(200, 30)  # Adjust button size for the green area
+            face_button.setVisible(False)  # Initially hidden
 
             face_button.clicked.connect(lambda _, idx=index, clp=clip: self.handle_button_click(idx, clp))
-            face_button.setVisible(False)
-            self.grid_layout.addWidget(face_button, row, 1)
             self.faces_buttons.append(face_button)
-            row += 1
 
-        faces_button.clicked.connect(lambda: self.toggle_buttons(self.faces_buttons))
+        faces_button.clicked.connect(self.toggle_faces_buttons)
 
         #phan cac object da track được
         for class_name, objects in self.segmented_objects.items():
@@ -144,19 +153,19 @@ class ThirdWindow(QWidget):
             self.grid_layout.addWidget(class_button, row, 0, 1, 2)
             row += 1
 
-            self.object_buttons[class_name] = []
+            self.object_buttons[class_name] = []  # Store buttons for each class
             for obj in objects:
                 button_text = f"(Frames {obj['appear_frame']} - {obj['disappear_frame']})"
-                object_button = QPushButton(button_text, self)
+                object_button = QPushButton(button_text, self.extra_layout_container_below)  # Add to green area
                 object_button.setStyleSheet(self.object_style())
-                object_button.setFixedSize(800, 20)
+                object_button.setFixedSize(200, 30)  # Adjust button size for green layout
                 object_button.clicked.connect(lambda _, ob=obj: self.show_object_image(ob))
-                object_button.setVisible(False)
-                self.grid_layout.addWidget(object_button, row, 1)
+                object_button.setVisible(False)  # Initially hidden
                 self.object_buttons[class_name].append(object_button)
-                row += 1
 
-            class_button.clicked.connect(lambda _, buttons=self.object_buttons[class_name]: self.toggle_buttons(buttons))
+            # Connect the class button to toggle the object buttons
+            class_button.clicked.connect(
+                lambda _, buttons=self.object_buttons[class_name]: self.toggle_object_buttons(buttons))
 
         #Phan tuong tac giua cac vat the
         main_action_button = QPushButton("Actions", self)
@@ -165,29 +174,79 @@ class ThirdWindow(QWidget):
         self.grid_layout.addWidget(main_action_button, row, 0, 1, 2)  # Add the main "Actions" button
         row += 1
 
-        self.action_buttons = []  # List to store all action buttons
-
+        # Create buttons for each action and store them
         for action_name, action_clips in self.segmented_actions.items():
             for clip in action_clips:
                 button_text = f"{clip['object1']} with {clip['object2']} (Frames {clip['appear_time']} - {clip['disappear_time']})"
-                action_button = QPushButton(button_text, self)
+                action_button = QPushButton(button_text, self.extra_layout_container_below)  # Add to green area
                 action_button.setStyleSheet(self.object_style())
-                action_button.setFixedSize(800, 20)
-                action_button.clicked.connect(lambda _, clp=clip: self.play_video(clip["video_path"]))
+                action_button.setFixedSize(200, 30)  # Adjust button size for the green area
                 action_button.setVisible(False)  # Initially hidden
-                self.grid_layout.addWidget(action_button, row, 1)
-                self.action_buttons.append(action_button)
-                row += 1
-        main_action_button.clicked.connect(lambda: self.toggle_buttons(self.action_buttons))
 
-    #hien thi danh sach items cho tung phan
-    def toggle_buttons(self, button_list):
+                # Correctly bind the `clip` variable to the lambda
+                action_button.clicked.connect(lambda _, clp=clip: self.play_video(clp["video_path"]))
+                self.action_buttons.append(action_button)
+
+        # Connect "Actions" button to toggle visibility in the green layout
+        main_action_button.clicked.connect(self.toggle_action_buttons)
+
+    def toggle_faces_buttons(self):
         """
-        Toggle visibility of the buttons in the provided list.
-        :param button_list: List of buttons to toggle visibility.
+        Toggles the visibility of the 'Faces' buttons and displays them in the green layout.
         """
-        for button in button_list:
-            button.setVisible(not button.isVisible())
+        # Clear the existing layout content
+        for i in reversed(range(self.extra_grid_layout.count())):
+            widget = self.extra_grid_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
+        # Add the buttons dynamically to the grid layout
+        if not any(button.isVisible() for button in self.faces_buttons):  # If hidden, make visible
+            for row, button in enumerate(self.faces_buttons):
+                button.setVisible(True)
+                self.extra_grid_layout.addWidget(button, row, 0)  # Add to green layout
+        else:  # If visible, hide them
+            for button in self.faces_buttons:
+                button.setVisible(False)
+
+    def toggle_action_buttons(self):
+        """
+        Toggles the visibility of the 'Actions' buttons and displays them in the green layout.
+        """
+        # Clear the existing layout content
+        for i in reversed(range(self.extra_grid_layout.count())):
+            widget = self.extra_grid_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
+        # Add the buttons dynamically to the grid layout
+        if not any(button.isVisible() for button in self.action_buttons):  # If hidden, make visible
+            for row, button in enumerate(self.action_buttons):
+                button.setVisible(True)
+                self.extra_grid_layout.addWidget(button, row, 0)  # Add to green layout
+        else:  # If visible, hide them
+            for button in self.action_buttons:
+                button.setVisible(False)
+
+    def toggle_object_buttons(self, buttons):
+        """
+        Toggles the visibility of object buttons and displays them in the green layout.
+        :param buttons: List of buttons to toggle.
+        """
+        # Clear the existing layout content
+        for i in reversed(range(self.extra_grid_layout.count())):
+            widget = self.extra_grid_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
+        # Add the buttons dynamically to the grid layout
+        if not any(button.isVisible() for button in buttons):  # If hidden, make visible
+            for row, button in enumerate(buttons):
+                button.setVisible(True)
+                self.extra_grid_layout.addWidget(button, row, 0)  # Add to green layout
+        else:  # If visible, hide them
+            for button in buttons:
+                button.setVisible(False)
 
     #hien thi phan tu trong Clip Detail
     def handle_button_click(self, index, clip):
@@ -276,16 +335,20 @@ class ThirdWindow(QWidget):
                 font-size: 8px;  
                 font-weight: bold;
                 color: white;
-                background-color: #00a181;
+                background-color: #2ef2a4;
                 padding: 3px;  
                 min-width: 100px;  
-                max-width: 400px;  
+                max-width: 200px;  
                 min-height: 20px;  
                 max-height: 30px;  
+                border-radius: 4px;
             }
-            QPushButton {border-radius: 4px;}  
+            QPushButton:hover {
                 background-color: #7ed957;
                 color: #004651;
+            }
+            QPushButton:pressed {
+                background-color: #005f41;
             }
         """
 
@@ -324,23 +387,23 @@ if __name__ == "__main__":
 
     # Example segmented_actions
     segmented_actions = {
-        "Person holding a cup": [
+        "A person with a chair": [
             {
                 "object1": "Person",
-                "object2": "Cup",
+                "object2": "Chair",
                 "appear_time": 4,  # Start time in seconds
                 "disappear_time": 64,  # End time in seconds
                 "video_path": "D:\\CODIng\\CV\\YOLO Image Detection\\segmented clips\\billie on the chair\\person and chair-('1', '3')_from_4_to_64.mp4",
                 "description": "A person holding a cup"
             }
         ],
-        "Car interacting with Person": [
+        "A person with a car": [
             {
-                "object1": "Car",
-                "object2": "Person",
+                "object1": "Person",
+                "object2": "Couch",
                 "appear_time": 10,
                 "disappear_time": 50,
-                "video_path": "D:\\CODIng\\CV\\YOLO Image Detection\\billie on the couch.mp4",
+                "video_path": "D:\\CODIng\\CV\\YOLO Image Detection\\billie on the chair.mp4",
                 "description": "A car interacting with a person"
             }
         ]
