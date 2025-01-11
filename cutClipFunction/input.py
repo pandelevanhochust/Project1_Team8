@@ -9,19 +9,14 @@ model = YOLO("yolo11m.pt")
 
 def convert_to_jpg(input_path, output_path=None):
     try:
-   
         img = Image.open(input_path)
-        
-        
         if img.mode != 'RGB':
             img = img.convert('RGB')
-        
-        
+
         if output_path is None:
             base_name = os.path.splitext(input_path)[0]
             output_path = f"{base_name}.jpg"
-        
-      
+
         img.save(output_path, format='JPEG', quality=95)
         print(f"Đã lưu tệp JPG: {output_path}")
         return output_path
@@ -37,7 +32,6 @@ def rotate_image(image, angle):
     rotated = cv.warpAffine(image, M, (w, h))
     return rotated
 
-
 def preprocess(images):   
     argImages = []
     for image in images:
@@ -51,20 +45,17 @@ def preprocess(images):
         argImages.extend([rotate_image(resized_image, angle) for angle in [-30, 30]])
     return argImages
 
-
-
 imageInput=[]
 video_path=""
 faceInInput=[]
+
 def inputProcess(images_path):
 # Load and preprocess reference images and video
     imageInput=[convert_to_jpg(img) for img in images_path]
-    
-
     argImages = preprocess([cv.imread(img) for img in imageInput])
     faceInInput = [enc for img in argImages for enc in face_encodings(img, model)]
     images_path=images_path
+
     if len(faceInInput) == 0:
        return [0,0]
     else: return [imageInput,faceInInput]
-    

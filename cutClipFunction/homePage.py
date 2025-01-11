@@ -7,9 +7,12 @@ from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QUrl
 import sys
+
+# from cutClipFunction.input import faceInInput
 from input import inputProcess
 from YOLOverse import execute
 from thirdPage import ThirdWindow
+# from trackFunction import tracker
 
 
 style = """
@@ -38,9 +41,8 @@ class FaceRecognitionUI(QWidget):
 
     def initUI(self):
         # Set background image and window size
-        background_image_path = "D:\\BTL\\Project1_Team8\\background.png"
+        background_image_path = "D:\\CODIng\\CV\\Project1_Team8\\background.png"
         self.set_background_and_size(background_image_path)
-
         self.setWindowTitle("WhereTheFace")
 
         # Add Images Button
@@ -56,7 +58,6 @@ class FaceRecognitionUI(QWidget):
         self.grid_layout = QGridLayout(self.image_preview)  # Lưới hiển thị ảnh
         self.grid_layout.setContentsMargins(5, 5, 5, 5)
         self.grid_layout.setSpacing(10)
-
         self.init_empty_grid()
 
         # Add Video Button
@@ -99,15 +100,15 @@ class FaceRecognitionUI(QWidget):
                 font-weight: bold;
                 color: white;
                 background-color:  #00a181;
-                border-radius: 90px;  
+                border-radius: 90px;
             }
             QPushButton:hover {
                 background-color: #7ed957;
             }
         """)
-        icon = QIcon("rock3.png")  # Replace with your icon path
+        icon = QIcon("D:\\CODIng\\CV\\Project1_Team8\\rock3.png")  # Replace with your icon path
         self.launch_button.setIcon(icon)
-        self.launch_button.setIconSize(self.launch_button.size() * 0.87)
+        self.launch_button.setIconSize(self.launch_button.size() * 0.6)
         self.launch_button.clicked.connect(self.launch)
 
     def set_background_and_size(self, image_path):
@@ -128,8 +129,7 @@ class FaceRecognitionUI(QWidget):
                 placeholder = QLabel("[+]", self)
                 placeholder.setStyleSheet(
                     """background-color: #004651; border: 1px dashed #999; color: white;
-                    font-size: 25px; text-align: center;border-radius: 10px"""
-                )
+                    font-size: 25px; text-align: center;border-radius: 10px""")
                 placeholder.setAlignment(Qt.AlignCenter)
                 self.grid_layout.addWidget(placeholder, row, col)
 
@@ -205,27 +205,28 @@ class FaceRecognitionUI(QWidget):
 
             self.video_player = QMediaPlayer(self)
             self.video_widget = QVideoWidget(self)
-
             self.video_widget.setGeometry(620, 222, 300, 200)
             self.video_widget.show()
-
             self.video_player.setVideoOutput(self.video_widget)
             self.video_player.setSource(QUrl.fromLocalFile(filename))
             self.video_player.play()
 
     def launch(self):
-       [imageInput,faceInInput]=inputProcess(images_path=self.image_paths)
-       if(self.video_path=="" or [imageInput,faceInInput]==[0,0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images.
-                                                 Make sure that images have face!!!""")
-       else : 
-           output_path,clipDetail=execute(imageInput,self.video_path,faceInInput)
-           self.win=ThirdWindow(output_path,clipDetail)
-           self.win.show()
-           
 
-            
-       
+        #Phan nay dung de test ghep code cua module trackFunction
+        # imageInput = []
+        # faceInInput = []
+        # output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path, faceInInput)
+        #
+        # self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
+        # self.win.show()
 
+       [imageInput,faceInInput]=inputProcess(images_path= self.image_paths)
+       if(self.video_path=="" or [imageInput,faceInInput]==[0,0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images. Make sure that images have face!!!""")
+       else :
+            output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path,faceInInput)
+            self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
+            self.win.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
