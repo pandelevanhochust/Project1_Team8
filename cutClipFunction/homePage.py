@@ -7,8 +7,8 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import (QApplication, QFileDialog, QGridLayout, QLabel,
                                QMessageBox, QPushButton, QVBoxLayout, QWidget)
 
-# from cutClipFunction.input import faceInInput
-# from input import inputProcess
+from cutClipFunction.input import faceInInput
+from input import inputProcess
 from thirdPage import ThirdWindow
 from YOLOverse import execute
 
@@ -213,20 +213,20 @@ class FaceRecognitionUI(QWidget):
 
     def launch(self):
 
-        # Phan nay dung de test ghep code cua module trackFunction
-        imageInput = []
-        faceInInput = []
-        output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path, faceInInput)
+        # # Phan nay dung de test ghep code cua module trackFunction
+        # imageInput = []
+        # faceInInput = []
+        # output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path, faceInInput)
+        #
+        # self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
+        # self.win.show()
 
-        self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
-        self.win.show()
-
-       # [imageInput,faceInInput]=inputProcess(images_path= self.image_paths)
-       # if(self.video_path=="" or [imageInput,faceInInput]==[0,0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images. Make sure that images have face!!!""")
-       # else :
-       #      output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path,faceInInput)
-       #      self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
-       #      self.win.show()
+       [imageInput,faceInInput]=inputProcess(images_path= self.image_paths)
+       if(self.video_path=="" or [imageInput,faceInInput]==[0,0]) : QMessageBox.information(self, "Help", """There's no face recognise in all images. Make sure that images have face!!!""")
+       else :
+            output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path,faceInInput)
+            self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
+            self.win.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

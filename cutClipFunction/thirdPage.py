@@ -82,14 +82,21 @@ class ThirdWindow(QWidget):
 
         # Thêm các nút vào lưới
         # self.add_buttons_to_grid(self.data_list)
-        self.extra_layout_container_below = QWidget(self)  # A new container widget
-        self.extra_layout_container_below.setStyleSheet(
-            "background-color: #00a181; border: none;")  # Set green background color and remove border
-        self.extra_layout_container_below.setFixedSize(500, 100)  # Adjust width and height
-        self.extra_layout_container_below.move(self.image_preview.x() + 15,
-                                               self.image_preview.y() + self.image_preview.height() + 40)
+        # Create a scroll area
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setGeometry(self.image_preview.x() + 15,
+                                     self.image_preview.y() + self.image_preview.height() + 40,
+                                     500, 100)  # Adjust position and size
+        self.scroll_area.setStyleSheet("background-color: #00a181; border: none;")  # Set green background
+        self.scroll_area.setWidgetResizable(True)  # Make it resizable
 
-        self.extra_grid_layout = QGridLayout(self.extra_layout_container_below)
+        # Create a widget to hold the layout inside the scroll area
+        self.scroll_widget = QWidget()
+        self.scroll_widget.setStyleSheet("background-color: #00a181; border: none;")  # Match green background
+        self.scroll_area.setWidget(self.scroll_widget)  # Set the widget in the scroll area
+
+        # Add a grid layout to the scroll widget
+        self.extra_grid_layout = QGridLayout(self.scroll_widget)
         self.extra_grid_layout.setContentsMargins(5, 5, 5, 5)  # Set small margins
         self.extra_grid_layout.setSpacing(5)  # Spacing between buttons
         self.extra_grid_layout.setAlignment(Qt.AlignTop)  # Align buttons to the top
@@ -108,6 +115,10 @@ class ThirdWindow(QWidget):
         self.close()
 
     def play_video(self, video_path):
+        if not self.media_player.isAvailable():
+            QMessageBox.critical(self, "Error", "Media backend not available!")
+            return
+
         self.media_player.setSource(QUrl.fromLocalFile(video_path))
         self.media_player.play()
         self.video_widget.show()
@@ -118,14 +129,14 @@ class ThirdWindow(QWidget):
 
     def add_buttons_to_grid(self):
         """
-        Tao ra list cac output de track duoc
+        Dynamically add buttons for faces, objects, and actions to the green layout.
         """
         row = 0  # Track the current row in the grid layout
         self.object_buttons = {}  # Dictionary to store buttons for each class
         self.action_buttons = []
         self.faces_buttons = []
 
-        # Phan tracking khuon mat
+        # Add buttons for faces
         faces_button = QPushButton("Faces", self)
         faces_button.setStyleSheet(self.button_style())
         faces_button.setFixedSize(200, 20)
@@ -133,104 +144,64 @@ class ThirdWindow(QWidget):
         row += 1
 
         for index, clip in enumerate(self.data_list):
-            button_text = f"Faces: (Frames {clip['start_time']} - {clip['end_time']})"
-            face_button = QPushButton(button_text, self.extra_layout_container_below)  # Add to green area
+            button_text = f"Faces:\n(Frames {clip['start_time']} - {clip['end_time']})"
+            face_button = QPushButton(button_text,self.scroll_widget)
             face_button.setStyleSheet(self.object_style())
-            face_button.setFixedSize(200, 30)  # Adjust button size for the green area
+            face_button.setFixedSize(120, 40)  # Adjust button size for the green area
             face_button.setVisible(False)  # Initially hidden
 
             face_button.clicked.connect(lambda _, idx=index, clp=clip: self.handle_button_click(idx, clp))
             self.faces_buttons.append(face_button)
 
-        faces_button.clicked.connect(self.toggle_faces_buttons)
+        faces_button.clicked.connect(lambda: self.toggle_buttons(self.faces_buttons))
 
-        #phan cac object da track được
+        # Add buttons for objects
         for class_name, objects in self.segmented_objects.items():
-            # Create a button for the class name
             class_button = QPushButton(class_name, self)
             class_button.setStyleSheet(self.button_style())
             class_button.setFixedSize(200, 20)
             self.grid_layout.addWidget(class_button, row, 0, 1, 2)
             row += 1
 
-            self.object_buttons[class_name] = []  # Store buttons for each class
+            self.object_buttons[class_name] = []
             for obj in objects:
                 button_text = f"(Frames {obj['appear_frame']} - {obj['disappear_frame']})"
-                object_button = QPushButton(button_text, self.extra_layout_container_below)  # Add to green area
+                object_button = QPushButton(button_text,self.scroll_widget)
                 object_button.setStyleSheet(self.object_style())
-                object_button.setFixedSize(200, 30)  # Adjust button size for green layout
-                object_button.clicked.connect(lambda _, ob=obj: self.show_object_image(ob))
+                object_button.setFixedSize(120, 40)  # Adjust button size for green layout
                 object_button.setVisible(False)  # Initially hidden
+                object_button.clicked.connect(lambda _, ob=obj: self.show_object_image(ob))
                 self.object_buttons[class_name].append(object_button)
 
-            # Connect the class button to toggle the object buttons
             class_button.clicked.connect(
-                lambda _, buttons=self.object_buttons[class_name]: self.toggle_object_buttons(buttons))
+                lambda _, buttons=self.object_buttons[class_name]: self.toggle_buttons(buttons)
+            )
 
-        #Phan tuong tac giua cac vat the
+        # Add buttons for actions
         main_action_button = QPushButton("Actions", self)
         main_action_button.setStyleSheet(self.button_style())
         main_action_button.setFixedSize(200, 20)
-        self.grid_layout.addWidget(main_action_button, row, 0, 1, 2)  # Add the main "Actions" button
+        self.grid_layout.addWidget(main_action_button, row, 0, 1, 2)
         row += 1
 
-        # Create buttons for each action and store them
         for action_name, action_clips in self.segmented_actions.items():
             for clip in action_clips:
-                button_text = f"{clip['object1']} with {clip['object2']} (Frames {clip['appear_time']} - {clip['disappear_time']})"
-                action_button = QPushButton(button_text, self.extra_layout_container_below)  # Add to green area
+                button_text = (
+                    f"{clip['object1']} with {clip['object2']}\n"
+                    f"(Frames {clip['appear_time']} - {clip['disappear_time']})"
+                )
+                action_button = QPushButton(button_text,self.scroll_widget)
                 action_button.setStyleSheet(self.object_style())
-                action_button.setFixedSize(200, 30)  # Adjust button size for the green area
+                action_button.setFixedSize(300, 60)  # Adjust button size for the green area
                 action_button.setVisible(False)  # Initially hidden
-
-                # Correctly bind the `clip` variable to the lambda
                 action_button.clicked.connect(lambda _, clp=clip: self.play_video(clp["video_path"]))
                 self.action_buttons.append(action_button)
 
-        # Connect "Actions" button to toggle visibility in the green layout
-        main_action_button.clicked.connect(self.toggle_action_buttons)
+        main_action_button.clicked.connect(lambda: self.toggle_buttons(self.action_buttons))
 
-    def toggle_faces_buttons(self):
+    def toggle_buttons(self, buttons):
         """
-        Toggles the visibility of the 'Faces' buttons and displays them in the green layout.
-        """
-        # Clear the existing layout content
-        for i in reversed(range(self.extra_grid_layout.count())):
-            widget = self.extra_grid_layout.itemAt(i).widget()
-            if widget:
-                widget.setParent(None)
-
-        # Add the buttons dynamically to the grid layout
-        if not any(button.isVisible() for button in self.faces_buttons):  # If hidden, make visible
-            for row, button in enumerate(self.faces_buttons):
-                button.setVisible(True)
-                self.extra_grid_layout.addWidget(button, row, 0)  # Add to green layout
-        else:  # If visible, hide them
-            for button in self.faces_buttons:
-                button.setVisible(False)
-
-    def toggle_action_buttons(self):
-        """
-        Toggles the visibility of the 'Actions' buttons and displays them in the green layout.
-        """
-        # Clear the existing layout content
-        for i in reversed(range(self.extra_grid_layout.count())):
-            widget = self.extra_grid_layout.itemAt(i).widget()
-            if widget:
-                widget.setParent(None)
-
-        # Add the buttons dynamically to the grid layout
-        if not any(button.isVisible() for button in self.action_buttons):  # If hidden, make visible
-            for row, button in enumerate(self.action_buttons):
-                button.setVisible(True)
-                self.extra_grid_layout.addWidget(button, row, 0)  # Add to green layout
-        else:  # If visible, hide them
-            for button in self.action_buttons:
-                button.setVisible(False)
-
-    def toggle_object_buttons(self, buttons):
-        """
-        Toggles the visibility of object buttons and displays them in the green layout.
+        Toggles the visibility of a list of buttons and displays them in the green layout.
         :param buttons: List of buttons to toggle.
         """
         # Clear the existing layout content
@@ -241,9 +212,10 @@ class ThirdWindow(QWidget):
 
         # Add the buttons dynamically to the grid layout
         if not any(button.isVisible() for button in buttons):  # If hidden, make visible
-            for row, button in enumerate(buttons):
+            for idx, button in enumerate(buttons):
                 button.setVisible(True)
-                self.extra_grid_layout.addWidget(button, row, 0)  # Add to green layout
+                row, col = divmod(idx, 4)  # Adjust based on the maximum number of columns
+                self.extra_grid_layout.addWidget(button, row, col)
         else:  # If visible, hide them
             for button in buttons:
                 button.setVisible(False)
@@ -338,8 +310,8 @@ class ThirdWindow(QWidget):
                 background-color: #2ef2a4;
                 padding: 3px;  
                 min-width: 100px;  
-                max-width: 200px;  
-                min-height: 20px;  
+                max-width: 120px;  
+                min-height: 2px;  
                 max-height: 30px;  
                 border-radius: 4px;
             }
