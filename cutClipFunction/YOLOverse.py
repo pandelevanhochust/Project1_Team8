@@ -3,8 +3,12 @@ import numpy as np
 from moviepy import VideoFileClip, concatenate_videoclips
 import face_recognition
 from ultralytics import YOLO
+
+#from cutClipFunction.trackFunction import width
 #from trackFunction import get_action_descriptions,tracker,actions,classes_name
 from executePage import SecondWindow
+from trackFunction import trackerFunc, object_segmentation, action_segmentation
+
 model = YOLO("yolo11m.pt")
 
 # Load YOLO model
@@ -16,16 +20,16 @@ def face_encodings(image, model):
             x1, y1, x2, y2 = map(int, box)  # Bounding box coordinates
             face_crop = image[y1:y2, x1:x2]
             face_crop_rgb = cv.cvtColor(face_crop, cv.COLOR_BGR2RGB)
+            face_crop_rgb.astype('uint8')
             if face_crop_rgb.shape[0] >= 10 and face_crop_rgb.shape[1] >= 10:
                 face_enc = face_recognition.face_encodings(face_crop_rgb)
                 if face_enc:
                     encodings.append(face_enc[0])
     return encodings
 
-
-
 def execute(imageInput,video_path,faceInInput):
     window= SecondWindow()
+    window.start_video(video_path)
     cap = cv.VideoCapture(video_path)
     window.show()
     
@@ -35,7 +39,6 @@ def execute(imageInput,video_path,faceInInput):
     height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
     frame_count = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
     duration = frame_count / fps
-    
 
     frame_number = 0
     clips = []
@@ -45,8 +48,9 @@ def execute(imageInput,video_path,faceInInput):
     last_clip_end_time = 0
     finetuneImages=10- len(imageInput)  #set the needed images is 10
     #Create dict to save the detail of each clips:
-    clipsDetail= [] 
-# main code :
+    clipsDetail= []
+
+    # main code :
     while cap.isOpened():
         #bắt đầu thêm các tính năng từ đây
         ret, frame = cap.read()
@@ -54,17 +58,14 @@ def execute(imageInput,video_path,faceInInput):
             print("The video will be exported in seconds")
             break
         framed= cv.resize(frame,(int(frame.shape[1]*0.75),int(frame.shape[0]*0.75)))
-        cv.imshow("processing frame",framed)
+        # cv.imshow("processing frame",framed)
         cv.waitKey(1)
-        
-        
-        
+
         if frame_number % 4 == 0:   # reduce the frame process
             results = model.predict(source=frame, conf=0.5)    #adjust the conf and size here
-            
-            
+
         face_detected = False
-        detected_objects = set()
+        detected_objects = []
         
         for result in results:
             for box in result.boxes.data:
@@ -72,21 +73,21 @@ def execute(imageInput,video_path,faceInInput):
                 face_crop = frame[y1:y2, x1:x2]
                 face_crop_encodings = face_encodings(face_crop, model)
                 cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                
+
+                #confidence
+                confidence = float(box[4])
                 class_id = int(box[5])
-                detected_objects.add(model.names[class_id])
-                
+
+                detected_objects.append([[x1, y1, x2 - x1, y2 - y1], confidence, class_id])
+
                 if(class_id==0.0000) and any(
                         face_recognition.compare_faces(faceInInput, enc, tolerance=tolerance)
                         for enc in face_crop_encodings):
-
                     face_detected = True
                     latestFace = frame_number
                     break
                 
-        # decriptions=get_action_descriptions(detected_objects,actions)        
-    # tracking(detections,frame)  
-            
+        trackerFunc(frame,detected_objects,video_path,frame_number)
 
         if face_detected:
             print(f"I found her face at {frame_number / fps} seconds\n")
@@ -124,19 +125,15 @@ def execute(imageInput,video_path,faceInInput):
         if window.isClose==True :
             print("Stop processing the video. The video will be exported in seconds")
             break
-        
-
         frame_number += 1
     cap.release()
     cv.destroyAllWindows()
-    
 
+    #Segmenting after tracking
+    segmented_objects = object_segmentation(video_path)
+    segmented_actions = action_segmentation(video_path)
 
-
-
-
-
-    output_path = "D:\\BTL\\Project1_Team8\\exportVideo\\KhanhNgoc.mp4"
+    output_path = "D:\CODIng\CV\Project1_Team8"
     if clips:
         for clip_info in clipsDetail:
             print(clip_info)
@@ -145,9 +142,7 @@ def execute(imageInput,video_path,faceInInput):
         final_video.write_videofile(output_path, codec='libx264')
         final_video.close()    # đoạn này chưa chắc đã giải phóng tài nguyên nên cần thực hiện giải phóng trước
         print("Export complete")
-        return output_path,clipsDetail
-
-        
+        return output_path,clipsDetail,segmented_objects,segmented_actions
 
     else:
         print("Oops i did it again!!")

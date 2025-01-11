@@ -34,9 +34,8 @@ class FaceRecognitionUI(QWidget):
 
     def initUI(self):
         # Set background image and window size
-        background_image_path = "D:\\BTL\\Project1_Team8\\background.png"
+        background_image_path = "D:\\CODIng\\CV\\Project1_Team8\\background.png"
         self.set_background_and_size(background_image_path)
-
         self.setWindowTitle("WhereTheFace")
 
         # Add Images Button
@@ -52,7 +51,6 @@ class FaceRecognitionUI(QWidget):
         self.grid_layout = QGridLayout(self.image_preview)  # Lưới hiển thị ảnh
         self.grid_layout.setContentsMargins(5, 5, 5, 5)
         self.grid_layout.setSpacing(10)
-
         self.init_empty_grid()
 
         # Add Video Button
