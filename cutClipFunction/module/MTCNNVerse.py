@@ -14,13 +14,13 @@ def rotate_image(image, angle):
     return rotated
 
 
-def preprocess(images):   
-    
+def preprocess(images):
+
     argImages = []
     for image in images:
-        
+
         resized_image = cv.resize(image, (image.shape[1]*2, image.shape[0]*2))
-        
+
         argImages.extend([
             resized_image,
             cv.flip(resized_image, 1),
@@ -84,8 +84,8 @@ while cap.isOpened():
     if not ret:
         print("The video will be export in second")
         break
-    
-    
+
+
     cv.imshow("Processing Frame", frame)
     cv.waitKey(1)
     #preprocessing  balance the light and reduce noise
@@ -97,7 +97,7 @@ while cap.isOpened():
     # frame = cv.GaussianBlur(frame, (5, 5), 0)
     faces = mtcnn.detect_faces(frame)
     face_detected = False
-    
+
     for face in faces:
         x1, y1, width, height = face['box']
         x2, y2 = x1 + width, y1 + height
@@ -109,7 +109,7 @@ while cap.isOpened():
             face_recognition.compare_faces(faceInInput, enc, tolerance=tolerance)
             for enc in face_crop_encodings
         ):
-            
+
             face_detected = True
             latestFace=frame_number
             break
@@ -123,7 +123,7 @@ while cap.isOpened():
             end_time = frame_number / fps + 2
             clip = VideoFileClip(video_path).subclipped(currStart, end_time)
             clips.append(clip)
-            
+
             cap.set(cv.CAP_PROP_POS_MSEC, currStart * 1000)  # Đặt video tới thời điểm currStart
             ret, first_frame = cap.read()
             cv.imshow("first",first_frame)

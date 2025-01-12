@@ -1,15 +1,22 @@
-from PySide6.QtWidgets import (
-    QApplication, QWidget, QPushButton, QFileDialog, QMessageBox, QGridLayout, QLabel, QVBoxLayout
-)
-from PySide6.QtGui import QPixmap, QPalette, QBrush, QIcon
-from PySide6.QtCore import Qt
-from PySide6.QtMultimedia import QMediaPlayer
-from PySide6.QtMultimediaWidgets import QVideoWidget
-from PySide6.QtCore import QUrl
 import sys
+<<<<<<< HEAD
 from module.input import inputProcess
 from module.YOLOverse import execute
+=======
+
+from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import QBrush, QIcon, QPalette, QPixmap
+from PySide6.QtMultimedia import QMediaPlayer
+from PySide6.QtMultimediaWidgets import QVideoWidget
+from PySide6.QtWidgets import (QApplication, QFileDialog, QGridLayout, QLabel,
+                               QMessageBox, QPushButton, QVBoxLayout, QWidget)
+
+from cutClipFunction.input import faceInInput
+from input import inputProcess
+>>>>>>> pr/2
 from thirdPage import ThirdWindow
+from YOLOverse import execute
+
 # from trackFunction import tracker
 
 
@@ -219,8 +226,18 @@ class FaceRecognitionUI(QWidget):
            self.win.show()
            
 
+<<<<<<< HEAD
             
        
+=======
+        # # Phan nay dung de test ghep code cua module trackFunction
+        # imageInput = []
+        # faceInInput = []
+        # output_path, clipDetail, segmented_objects, segmented_actions = execute(imageInput, self.video_path, faceInInput)
+        #
+        # self.win=ThirdWindow(output_path,clipDetail,segmented_objects,segmented_actions)
+        # self.win.show()
+>>>>>>> pr/2
 
 
 if __name__ == "__main__":
