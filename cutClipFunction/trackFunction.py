@@ -6,11 +6,11 @@ from PIL import Image
 import os
 import math
 from moviepy.video.io.VideoFileClip import VideoFileClip
-# from module.YOLOverse import frame, class_id, output_path
+# from YOLOverse import frame
 
 # Initialize YOLO model
 model = YOLO('yolo11l.pt')  # Replace with your pretrained YOLO model path
-#create directory for segmented objects
+
 
 # Initialize DeepSort tracker
 tracker = DeepSort(max_age=1)
@@ -106,10 +106,10 @@ def action_tracker(detections,frame_number):
 def object_segmentation(input):
     cap = cv2.VideoCapture(input)
     # Dau ra
-    export_dir = "Export Video"
+    export_dir = "exportVideo"
     os.makedirs(export_dir, exist_ok=True)
     # Sub directory
-    images_dir = os.path.join(export_dir, "Segmented Images")
+    images_dir = os.path.join(export_dir, "segmentedImages")
     os.makedirs(images_dir, exist_ok=True)
 
     segmented_objects = {}
@@ -134,7 +134,7 @@ def object_segmentation(input):
 
         output_path = os.path.join(
             class_dir,
-            f"{obj['name']}_{track_id}_Frames{appear}-{disappear}.jpg"
+            f"{obj['name']}_{track_id}_Frames{appear}_{disappear}.jpg"
         )
         cv2.imwrite(output_path, segmented_object)
 
@@ -164,11 +164,11 @@ def action_segmentation(input):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
     # Dau ra
-    export_dir = "Export Video"
+    export_dir = "exportVideo"
     os.makedirs(export_dir, exist_ok=True)
 
     # Sub directory
-    videos_dir = os.path.join(export_dir, "Segmented Videos")
+    videos_dir = os.path.join(export_dir, "segmentedVideos")
     os.makedirs(videos_dir, exist_ok=True)
 
     segmented_actions = {}
@@ -192,7 +192,7 @@ def action_segmentation(input):
 
         output_filename = os.path.join(
             videos_dir,
-            f"{safe_description}_Frames{appear}-{disappear}.mp4"
+            f"{safe_description}_Frames_{appear}_{disappear}.mp4"
         )
 
         # Extract clip
@@ -216,7 +216,7 @@ def action_segmentation(input):
         for description, actions in segmented_actions.items():
             for action in actions:
                 print(f"{action['object1']} and {action['object2']} "
-                      f"from frame {int(action['appear_time'] * fps)} to frame {int(action['disappear_time'] * fps)}.")
+                      f"from frame {int(action['appear_time'])} to frame {int(action['disappear_time'])}.")
 
     return segmented_actions
 

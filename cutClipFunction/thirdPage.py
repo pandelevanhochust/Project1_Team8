@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QApplication, QWidget, QPushButton, QMessageBox, QLabel, QGridLayout,QScrollArea, QVBoxLayout
 )
 from PySide6.QtGui import QPixmap, QPalette, QBrush
-from PySide6.QtCore import QTimer, QUrl,Qt
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 import sys
@@ -22,7 +22,7 @@ class ThirdWindow(QWidget):
 
     def initUI(self):
         # Cài đặt hình nền
-        background_image_path = 'thirdPage.png'
+        background_image_path = 'D:\\CODIng\\CV\\Project1_Team8\\thirdPage.png'
 
         pixmap = QPixmap(background_image_path)
         if pixmap.isNull():
@@ -73,7 +73,7 @@ class ThirdWindow(QWidget):
         self.image_preview = QLabel(self)  # Change from QWidget to QLabel
         self.image_preview.setGeometry(0, 230, 200, 200)  # Size and position
         self.image_preview.setStyleSheet("background-color: #eeeeee; border: 1px solid #ccc; border-radius: 10px;")
-        self.image_preview.setAlignment(Qt.AlignCenter)
+        # self.image_preview.setAlignment(Qt.AlignCenter)  # Center alignment for the image
 
         # Tạo lưới hiển thị bên trong widget con
         self.grid_layout = QGridLayout(self.image_preview)
@@ -283,13 +283,17 @@ class ThirdWindow(QWidget):
         return """
             QPushButton {
                 font-family: Muli;  
-                font-size: 16px;
+                font-size: 14px; 
                 font-weight: bold;
                 color: white;
-                background-color:  #00a181;
-                padding: 10px;
+                background-color: #007acc;
+                padding: 2px; 
+                min-width: 100px;  
+                max-width: 120px;  
+                min-height: 20px; 
+                max-height: 30px;  
             }
-            QPushButton {border-radius: 10px;}
+            QPushButton {border-radius: 4px;}
             QPushButton:hover {
                 background-color: #5dade2;
                 color: #ffffff;
@@ -324,34 +328,33 @@ class ThirdWindow(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    # # Dữ liệu mẫu cho clipsDetail
-    # clipsDetail = [
-    #     {
-    #         "start_time": "00:00:05",
-    #         "end_time": "00:00:15",
-    #         "detected_objects": ["Car", "Tree", "Dog"]
-    #     },
-    #     {
-    #         "start_time": "00:01:00",
-    #         "end_time": "00:01:30",
-    #         "detected_objects": ["Person", "Bicycle"]
-    #     },
-    #     {
-    #         "start_time": "00:02:00",
-    #         "end_time": "00:02:30",
-    #         "detected_objects": ["Cat", "Bus"]
-    #     },
-    # ]
+    # Dữ liệu mẫu cho clipsDetail
+    clipsDetail = [
+        {
+            "start_time": "00:00:05",
+            "end_time": "00:00:15",
+            "detected_objects": ["Car", "Tree", "Dog"]
+        },
+        {
+            "start_time": "00:01:00",
+            "end_time": "00:01:30",
+            "detected_objects": ["Person", "Bicycle"]
+        },
+        {
+            "start_time": "00:02:00",
+            "end_time": "00:02:30",
+            "detected_objects": ["Cat", "Bus"]
+        },
+    ]
 
-    # segmented_objects = {
-    #     "Car": [
-    #         {"track_id": 1, "image_path": "D:\\CODIng\\CV\\YOLO Image Detection\\segmented objects\\billie on the chair\\person\\person-1_from_4_to_94.jpg","appear_frame": 20, "disappear_frame": 30},
-    #         {"track_id": 2, "image_path": "car2.jpg", "appear_frame": 20, "disappear_frame": 30}
-    #     ],
-    #     "Person": [
-    #         {"track_id": 3, "image_path": "D:\CODIng\CV\Project1_Team8\BillieEilish2.jpg", "appear_frame": 5, "disappear_frame": 15}
-    #     ]
-    # }
+    segmented_objects = {
+        "Chair": [
+            {"track_id": 1,"image_path":  "exportVideo\segmentedImages\chair\chair_50_Frames1226_1240.jpg","appear_frame": 1226, "disappear_frame": 1240}
+        ],
+        "Person": [
+            {"track_id": 3, "image_path": "exportVideo\segmentedImages\person\person_1_Frames2_148.jpg","appear_frame": 1, "disappear_frame": 148}
+        ]
+    }
 
     # Example segmented_actions
     segmented_actions = {
@@ -361,24 +364,14 @@ if __name__ == "__main__":
                 "object2": "Chair",
                 "appear_time": 4,  # Start time in seconds
                 "disappear_time": 64,  # End time in seconds
-                "video_path": "D:\\CODIng\\CV\\YOLO Image Detection\\segmented clips\\billie on the chair\\person and chair-('1', '3')_from_4_to_64.mp4",
+                "video_path": "exportVideo\segmentedVideos\A_person_21_is_sitting_on_a_chair_22_Frames_494_516.mp4",
                 "description": "A person holding a cup"
-            }
-        ],
-        "A person with a car": [
-            {
-                "object1": "Person",
-                "object2": "Couch",
-                "appear_time": 10,
-                "disappear_time": 50,
-                "video_path": "D:\\CODIng\\CV\\YOLO Image Detection\\billie on the chair.mp4",
-                "description": "A car interacting with a person"
             }
         ]
     }
 
-    video_path = "exportVideo\\KhanhNgoc.mp4" # Thay bằng đường dẫn thực tế
-    window = ThirdWindow()
+    video_path = "exportVideo\segmentedVideos\A_person_21_is_sitting_on_a_chair_22_Frames_494_516.mp4" # Thay bằng đường dẫn thực tế
+    window = ThirdWindow(video_path=video_path, clipDetail=clipsDetail,segmented_objects=segmented_objects, segmented_actions=segmented_actions)
     window.show()
 
     sys.exit(app.exec())
