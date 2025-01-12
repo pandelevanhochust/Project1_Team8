@@ -348,12 +348,11 @@ if __name__ == "__main__":
     ]
 
     segmented_objects = {
-        "Car": [
-            {"track_id": 1, "image_path": "D:\\CODIng\\CV\\YOLO Image Detection\\segmented objects\\billie on the chair\\person\\person-1_from_4_to_94.jpg","appear_frame": 20, "disappear_frame": 30},
-            {"track_id": 2, "image_path": "car2.jpg", "appear_frame": 20, "disappear_frame": 30}
+        "Chair": [
+            {"track_id": 1,"image_path":  "Export Video\Segmented_Images\chair\chair_50_Frames1226_1240.jpg","appear_frame": 1226, "disappear_frame": 1240}
         ],
         "Person": [
-            {"track_id": 3, "image_path": "D:\CODIng\CV\Project1_Team8\BillieEilish2.jpg", "appear_frame": 5, "disappear_frame": 15}
+            {"track_id": 3, "image_path": "Export Video\Segmented Images\person\person_1_Frames2_148.jpg","appear_frame": 1, "disappear_frame": 148}
         ]
     }
 
@@ -365,23 +364,13 @@ if __name__ == "__main__":
                 "object2": "Chair",
                 "appear_time": 4,  # Start time in seconds
                 "disappear_time": 64,  # End time in seconds
-                "video_path": "D:\\CODIng\\CV\\YOLO Image Detection\\segmented clips\\billie on the chair\\person and chair-('1', '3')_from_4_to_64.mp4",
+                "video_path": "Export Video\Segmented Videos\A_person_21_is_sitting_on_a_chair_22_Frames_494_516.mp4",
                 "description": "A person holding a cup"
-            }
-        ],
-        "A person with a car": [
-            {
-                "object1": "Person",
-                "object2": "Couch",
-                "appear_time": 10,
-                "disappear_time": 50,
-                "video_path": "D:\\CODIng\\CV\\YOLO Image Detection\\billie on the chair.mp4",
-                "description": "A car interacting with a person"
             }
         ]
     }
 
-    video_path = "D:\\CODIng\\CV\\YOLO Image Detection\\billie on the chair.mp4" # Thay bằng đường dẫn thực tế
+    video_path = "Export Video\Segmented Videos\A_person_21_is_sitting_on_a_chair_22_Frames_494_516.mp4" # Thay bằng đường dẫn thực tế
     window = ThirdWindow(video_path=video_path, clipDetail=clipsDetail,segmented_objects=segmented_objects, segmented_actions=segmented_actions)
     window.show()
 
