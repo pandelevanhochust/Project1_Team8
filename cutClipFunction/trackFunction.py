@@ -106,10 +106,10 @@ def action_tracker(detections,frame_number):
 def object_segmentation(input):
     cap = cv2.VideoCapture(input)
     # Dau ra
-    export_dir = "Export_Video"
+    export_dir = "exportVideo"
     os.makedirs(export_dir, exist_ok=True)
     # Sub directory
-    images_dir = os.path.join(export_dir, "Segmented Images")
+    images_dir = os.path.join(export_dir, "segmentedImages")
     os.makedirs(images_dir, exist_ok=True)
 
     segmented_objects = {}
@@ -164,11 +164,11 @@ def action_segmentation(input):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
     # Dau ra
-    export_dir = "Export_Video"
+    export_dir = "exportVideo"
     os.makedirs(export_dir, exist_ok=True)
 
     # Sub directory
-    videos_dir = os.path.join(export_dir, "Segmented Videos")
+    videos_dir = os.path.join(export_dir, "segmentedVideos")
     os.makedirs(videos_dir, exist_ok=True)
 
     segmented_actions = {}

@@ -349,10 +349,10 @@ if __name__ == "__main__":
 
     segmented_objects = {
         "Chair": [
-            {"track_id": 1,"image_path":  "Export Video\Segmented_Images\chair\chair_50_Frames1226_1240.jpg","appear_frame": 1226, "disappear_frame": 1240}
+            {"track_id": 1,"image_path":  "exportVideo\segmentedImages\chair\chair_50_Frames1226_1240.jpg","appear_frame": 1226, "disappear_frame": 1240}
         ],
         "Person": [
-            {"track_id": 3, "image_path": "Export Video\Segmented Images\person\person_1_Frames2_148.jpg","appear_frame": 1, "disappear_frame": 148}
+            {"track_id": 3, "image_path": "exportVideo\segmentedImages\person\person_1_Frames2_148.jpg","appear_frame": 1, "disappear_frame": 148}
         ]
     }
 
@@ -364,13 +364,13 @@ if __name__ == "__main__":
                 "object2": "Chair",
                 "appear_time": 4,  # Start time in seconds
                 "disappear_time": 64,  # End time in seconds
-                "video_path": "Export Video\Segmented Videos\A_person_21_is_sitting_on_a_chair_22_Frames_494_516.mp4",
+                "video_path": "exportVideo\segmentedVideos\A_person_21_is_sitting_on_a_chair_22_Frames_494_516.mp4",
                 "description": "A person holding a cup"
             }
         ]
     }
 
-    video_path = "Export Video\Segmented Videos\A_person_21_is_sitting_on_a_chair_22_Frames_494_516.mp4" # Thay bằng đường dẫn thực tế
+    video_path = "exportVideo\segmentedVideos\A_person_21_is_sitting_on_a_chair_22_Frames_494_516.mp4" # Thay bằng đường dẫn thực tế
     window = ThirdWindow(video_path=video_path, clipDetail=clipsDetail,segmented_objects=segmented_objects, segmented_actions=segmented_actions)
     window.show()
 
