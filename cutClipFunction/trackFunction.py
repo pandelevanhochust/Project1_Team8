@@ -221,8 +221,7 @@ def action_segmentation(input):
     return segmented_actions
 
 # Ham tracker chinh
-def trackerFunc (results,input,frame,frame_number):
-    cap = cv2.VideoCapture(input)
+def trackerFunc (results,cap,frame,frame_number):
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     frame_resized = cv2.resize(frame, (width, height))
