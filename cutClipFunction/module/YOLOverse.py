@@ -67,7 +67,7 @@ def execute(imageInput, video_path, faceInInput):
         if frame_number % 4 == 0:  # reduce the frame process
             results = model.predict(source=frame)  # adjust the conf and size here
 
-        trackerFunc(results, video_path, frame,frame_number)
+        trackerFunc(results, cap, frame,frame_number)
 
         face_detected = False
         detected_objects = []
