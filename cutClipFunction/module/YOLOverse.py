@@ -67,8 +67,8 @@ def execute(imageInput, video_path, faceInInput):
         if frame_number % 4 == 0:  # reduce the frame process
             results = model.predict(source=frame)  # adjust the conf and size here
 
-        trackerFunc(results, video_path, frame,frame_number)
-
+        trackerFunc(results,width,height, frame,frame_number)
+#def def trackerFunc (results,input,frame,frame_number):
         face_detected = False
         detected_objects = []
 
@@ -151,9 +151,10 @@ def execute(imageInput, video_path, faceInInput):
         final_video.write_videofile(output_path, codec='libx264')
         final_video.close()  # đoạn này chưa chắc đã giải phóng tài nguyên nên cần thực hiện giải phóng trước
         print("Export complete")
-        return output_path, clipsDetail, segmented_objects, segmented_actions
+        return [output_path, clipsDetail, segmented_objects, segmented_actions]
 
     else:
         print("Oops! I did it again!! I couldn't get any clip which having her face")
+        return [0,0,0,0]
 
 # file gốc YOLO nằm ở đây

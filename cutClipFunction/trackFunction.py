@@ -221,14 +221,9 @@ def action_segmentation(input):
     return segmented_actions
 
 # Ham tracker chinh
-def trackerFunc (results,input,frame,frame_number):
-    cap = cv2.VideoCapture(input)
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+def trackerFunc (results,width,height,frame,frame_number):
     frame_resized = cv2.resize(frame, (width, height))
-
     detected_objects = []
-
     # Parse detections
     for box in results[0].boxes:
         bbox = box.xyxy.tolist()[0]

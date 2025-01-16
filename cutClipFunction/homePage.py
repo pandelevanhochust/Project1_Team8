@@ -7,10 +7,10 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import (QApplication, QFileDialog, QGridLayout, QLabel,
                                QMessageBox, QPushButton, QVBoxLayout, QWidget)
 
-from cutClipFunction.input import faceInInput
-from input import inputProcess
+from module.input import faceInInput
+from module.input import inputProcess
 from thirdPage import ThirdWindow
-from YOLOverse import execute
+from module.YOLOverse import execute
 
 # from trackFunction import tracker
 
@@ -41,7 +41,7 @@ class FaceRecognitionUI(QWidget):
 
     def initUI(self):
         # Set background image and window size
-        background_image_path = "D:\\CODIng\\CV\\Project1_Team8\\background.png"
+        background_image_path = "background.png"
         self.set_background_and_size(background_image_path)
         self.setWindowTitle("WhereTheFace")
 
@@ -106,7 +106,7 @@ class FaceRecognitionUI(QWidget):
                 background-color: #7ed957;
             }
         """)
-        icon = QIcon("D:\\CODIng\\CV\\Project1_Team8\\rock3.png")  # Replace with your icon path
+        icon = QIcon("rock3.png")  # Replace with your icon path
         self.launch_button.setIcon(icon)
         self.launch_button.setIconSize(self.launch_button.size() * 0.6)
         self.launch_button.clicked.connect(self.launch)
